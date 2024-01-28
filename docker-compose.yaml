@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  mysql:
+    image: library/mysql:8.0
+    container_name: mysql80
+    ports:
+      - 3306:3306
+    volumes:
+      - ./data/mysql-80:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=1234
