@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from api.index import init_api_list
-
+from infrastructure.mysql import engine, Base
 
 class ServerCreator:
     def __init__(self):
@@ -15,6 +15,10 @@ class ServerCreator:
     def get_app(self):
         return self.app
 
+    def database_init(self):
+        Base.metadata.create_all(bind=engine)
+
 
 server_creator = ServerCreator()
+server_creator.database_init()
 app = server_creator.get_app()
