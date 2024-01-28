@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from api.index import init_api_list
 from infrastructure.mysql import engine, Base
 
+
 class ServerCreator:
     def __init__(self):
         self.app = FastAPI()
