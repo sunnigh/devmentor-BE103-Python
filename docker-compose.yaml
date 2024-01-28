@@ -1,6 +1,14 @@
 version: "3"
 
 services:
+  web:
+    build:
+      context: .
+      dockerfile: devops/Dockerfile
+    ports:
+      - "8000:80"
+    depends_on:
+      - mysql
   mysql:
     image: library/mysql:8.0
     container_name: mysql80
