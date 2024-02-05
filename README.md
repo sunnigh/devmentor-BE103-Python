@@ -13,3 +13,30 @@
     ```
    localhots:8000
    ```
+
+
+# Migration
+- Upgrade
+   ```
+   alembic upgrade head      
+   ```
+
+- Downgrade
+  ```
+   alembic downgrade -1
+   ```
+  
+- Current version
+  ```
+   alembic current 
+   ```
+  
+- Current version
+  ```
+   alembic current 
+   ```
+  
+- Create new migration
+  ```
+   alembic revision -m "create XXX table" 
+   ```
