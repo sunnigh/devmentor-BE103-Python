@@ -14,18 +14,33 @@
    localhots:8000
    ```
 
-# DB Migrations
-## Up
-Please run migration up after container mysql is set
-```
-alembic upgrade head
-```
 
-## Down
-```
-alembic downgrade -1
-```
+# Migration
+- Upgrade
+   ```
+   alembic upgrade head      
+   ```
 
+- Downgrade
+  ```
+   alembic downgrade -1
+   ```
+  
+- Current version
+  ```
+   alembic current 
+   ```
+  
+- Current version
+  ```
+   alembic current 
+   ```
+  
+- Create new migration
+  ```
+   alembic revision -m "create XXX table" 
+   ```
+  
 # Example API
 
 ## List Post
