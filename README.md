@@ -45,12 +45,12 @@
 
 ## List Post
 ```
-curl --location '127.0.0.1:800/v1/posts'
+curl --location '127.0.0.1:8000/posts'
 ```
 
 ## Create Post
 ```
-curl --location '127.0.0.1:8000/v1/posts' \
+curl --location '127.0.0.1:8000/posts' \
 --header 'Content-Type: application/json' \
 --data '{
     "title":"12344rr",
