@@ -13,3 +13,32 @@
     ```
    localhots:8000
    ```
+
+# DB Migrations
+## Up
+Please run migration up after container mysql is set
+```
+alembic upgrade head
+```
+
+## Down
+```
+alembic downgrade -1
+```
+
+# Example API
+
+## List Post
+```
+curl --location '127.0.0.1:8080/posts'
+```
+
+## Create Post
+```
+curl --location '127.0.0.1:8080/posts' \
+--header 'Content-Type: application/json' \
+--data '{
+    "title":"12344rr",
+    "content" : "1333"
+}'
+```
