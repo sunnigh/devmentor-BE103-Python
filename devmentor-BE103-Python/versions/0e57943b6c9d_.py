@@ -20,7 +20,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.create_table(
-        "posts",
+        "student",  #table name
         sa.Column("student", sa.String(length=255), nullable=False),
 
     )
