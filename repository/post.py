@@ -28,10 +28,10 @@ def update(db: Session, id: int,post_update: PostUpdate):
     db.commit()
     return db_post
 
-def delete(id: int, db: Session):
+def delete(db: Session, id: int):
     db_post = db.query(Post).filter(Post.id == id).first()
     if db_post:
-        db.delete(item)
+        db.delete(db_post)
         db.commit()
         return {"message": "Item deleted successfully"}
     else:
