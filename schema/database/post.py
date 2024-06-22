@@ -15,3 +15,7 @@ class Post(PostBase):
 
     class Config:
         orm_mode = True
+
+class PostUpdate(BaseModel):
+    title: str | None = None
+    content: str | None = None
