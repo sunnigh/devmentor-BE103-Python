@@ -4,10 +4,15 @@ class NotifyBase(BaseModel):
     user_id: int
     type: str
     data: str
-    is_active: bool
 
+class Notify(NotifyBase):
+    id: int
+
+    class Config:
+        orm_mode: True
 class NotifyCreate(NotifyBase):
     pass
 
 class NotifyUpdate(NotifyBase):
-    pass
+    type: str | None = None
+    data: str | None = None

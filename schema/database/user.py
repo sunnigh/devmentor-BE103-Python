@@ -11,7 +11,17 @@ class UserCreate(UserBase):
     pass
 
 class User(UserBase):
-    pass
+    id: int
+    # events: List[int] = []
+    # notification_methods: List[int] = []
+
+    class Config:
+            orm_mode: True
 
 class UserUpdate(UserBase):
-    pass
+    username: str | None = None
+    account: str  | None = None
+    password: str  | None = None
+    language: str  | None = None
+
+

@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from infrastructure.mysql import Base
 
 class Notify(Base):
-    __tablename__ = "notification_methods"
+    __tablename__ = "Notification_methods"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
