@@ -9,11 +9,11 @@ packages = [{include = "devmentor_be103_python"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 fastapi = "^0.109.0"
-uvicorn = "^0.27.0"
 sqlalchemy = "^2.0.25"
 pymysql = "^1.1.0"
 cryptography = "^42.0.1"
 alembic = "^1.13.1"
+uvicorn = "^0.30.1"
 
 
 [build-system]
