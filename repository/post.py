@@ -33,6 +33,6 @@ def delete(db: Session, id: int):
     if db_post:
         db.delete(db_post)
         db.commit()
-        return {"message": "Item deleted successfully"}
+        return {"message": "post deleted successfully"}
     else:
         raise HTTPException(status_code=404, detail="Post not found")
