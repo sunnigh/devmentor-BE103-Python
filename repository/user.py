@@ -32,4 +32,4 @@ def delete(db: Session, user_id: int):
         raise HTTPException(status_code=404, detail="User not found")
     db.delete(db_user)
     db.commit()
-    return db_user
+    return {"message": "User deleted successfully"}

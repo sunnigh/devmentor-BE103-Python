@@ -10,3 +10,5 @@ class User(Base):
     password = Column(String(255), nullable=False)
     is_login = Column(Boolean, default=False)
     language = Column(String(255), nullable=False)
+
+    notification_methods = relationship("Notify", back_populates="user", cascade="all, delete")
