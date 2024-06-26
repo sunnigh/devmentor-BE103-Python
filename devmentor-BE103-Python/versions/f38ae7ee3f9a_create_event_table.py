@@ -20,13 +20,13 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.create_table(
-        'Event',
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('Date', sa.Date, nullable=False)
+        'events',
+        sa.Column('event_id', sa.Integer, primary_key=True),
+        sa.Column('event_date', sa.Date, nullable=False)
     )
     pass
 
 
 def downgrade() -> None:
-    op.drop_table('Event')
+    op.drop_table('events')
     pass

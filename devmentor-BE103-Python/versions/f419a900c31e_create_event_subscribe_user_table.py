@@ -20,14 +20,14 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.create_table(
-        'Event_Subscribe_user',
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('Event_id', sa.Integer, sa.ForeignKey('Event.id', ondelete='CASCADE'), nullable=False),
-        sa.Column('User_id', sa.Integer, sa.ForeignKey('User.id', ondelete='CASCADE'), nullable=False)
+        'subscribes',
+        sa.Column('subscribe_id', sa.Integer, primary_key=True),
+        sa.Column('event_id', sa.Integer, sa.ForeignKey('events.event_id', ondelete='CASCADE'), nullable=False),
+        sa.Column('user_id', sa.Integer, sa.ForeignKey('users.user_id', ondelete='CASCADE'), nullable=False)
     )
     pass
 
 
 def downgrade() -> None:
-    op.drop_table('Event_Subscribe_user')
+    op.drop_table('subscribes')
     pass

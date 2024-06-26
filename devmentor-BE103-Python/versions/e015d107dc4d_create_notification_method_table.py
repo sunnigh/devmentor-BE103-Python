@@ -20,16 +20,16 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.create_table(
-        'Notification_method',
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('Type', sa.String(length=255), nullable=False),
-        sa.Column('Data', sa.String(length=255), nullable=False),
-        sa.Column('User_id', sa.Integer, sa.ForeignKey('User.id', ondelete='CASCADE'), nullable=False),
-        sa.Column('Event_id', sa.Integer, sa.ForeignKey('Event.id', ondelete='CASCADE'), nullable=False)
+        'notification_methods',
+        sa.Column('notificationmethod_id', sa.Integer, primary_key=True),
+        sa.Column('type', sa.String(length=255), nullable=False),
+        sa.Column('data', sa.String(length=255), nullable=False),
+        sa.Column('user_id', sa.Integer, sa.ForeignKey('users.user_id', ondelete='CASCADE'), nullable=False),
+        sa.Column('event_id', sa.Integer, sa.ForeignKey('events.event_id', ondelete='CASCADE'), nullable=False)
     )
     pass
 
 
 def downgrade() -> None:
-    op.drop_table('Notification_method')
+    op.drop_table('notification_methods')
     pass

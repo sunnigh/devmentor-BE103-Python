@@ -20,17 +20,17 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.create_table(
-        'User',
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('Username', sa.String(length=255), nullable=False),
-        sa.Column('Account', sa.String(length=255), nullable=False),
-        sa.Column('Password', sa.String(length=255), nullable=False),
-        sa.Column('Is_login', sa.String(length=255), nullable=False),
-        sa.Column('Language', sa.String(length=255), nullable=False)
+        'users',
+        sa.Column('user_id', sa.Integer, primary_key=True),
+        sa.Column('user_name', sa.String(length=255), nullable=False),
+        sa.Column('account', sa.String(length=255), nullable=False),
+        sa.Column('password', sa.String(length=255), nullable=False),
+        sa.Column('is_login', sa.String(length=255), nullable=False),
+        sa.Column('language', sa.String(length=255), nullable=False)
     )
     pass
 
 
 def downgrade() -> None:
-    op.drop_table('User')
+    op.drop_table('users')
     pass

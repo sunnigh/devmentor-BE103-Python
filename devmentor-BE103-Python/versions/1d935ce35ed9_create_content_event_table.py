@@ -20,15 +20,15 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.create_table(
-        'Content_Event',
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('Language', sa.String(length=255), nullable=False),
-        sa.Column('Data', sa.String(length=255), nullable=False),
-        sa.Column('Event_id', sa.Integer, sa.ForeignKey('Event.id', ondelete='CASCADE'), nullable=False)
+        'contents',
+        sa.Column('contents_id', sa.Integer, primary_key=True),
+        sa.Column('language', sa.String(length=255), nullable=False),
+        sa.Column('contents_data', sa.String(length=255), nullable=False),
+        sa.Column('event_id', sa.Integer, sa.ForeignKey('events.event_id', ondelete='CASCADE'), nullable=False)
     )
     pass
 
 
 def downgrade() -> None:
-    op.drop_table('Content_Event')
+    op.drop_table('contents')
     pass
