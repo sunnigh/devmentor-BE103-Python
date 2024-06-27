@@ -20,7 +20,7 @@ def get(db: Session, id: int):
     return db.query(Post).filter(Post.id == id).first()
 
 def update(db: Session, id: int,post_update: PostUpdate):
-    db_post = db.query(Post).filter(Post.id == id).first()
+    db_post = get(db, id)
     if not db_post:
         raise HTTPException(status_code=404, detail="Post not found")
     db_post.title = post_update.title
@@ -29,10 +29,10 @@ def update(db: Session, id: int,post_update: PostUpdate):
     return db_post
 
 def delete(db: Session, id: int):
-    db_post = db.query(Post).filter(Post.id == id).first()
+    db_post = get(db, id)
     if db_post:
         db.delete(db_post)
         db.commit()
-        return {"message": "Item deleted successfully"}
+        return {"message": "post deleted successfully"}
     else:
         raise HTTPException(status_code=404, detail="Post not found")
