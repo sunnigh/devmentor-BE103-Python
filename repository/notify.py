@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
-from models.notify import Notify
+from database.notify import Notify
 from schema.database.notify import NotifyCreate, NotifyUpdate
+from fastapi import HTTPException
 
 def lists(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Notify).offset(skip).limit(limit).all()
@@ -16,7 +17,7 @@ def get(db: Session, notify_id: int):
     return db.query(Notify).filter(Notify.id == notify_id).first()
 
 def update(db: Session, notify_id: int, notify_update: NotifyUpdate):
-    db_notify = db.query(Notify).filter(Notify.id == notify_id).first()
+    db_notify = get(db,id)
     if not db_notify:
         raise HTTPException(status_code=404, detail="Notification Method not found")
     for key, value in notify_update.dict().items():
@@ -26,7 +27,7 @@ def update(db: Session, notify_id: int, notify_update: NotifyUpdate):
     return db_notify
 
 def delete(db: Session, notify_id: int):
-    db_notify = db.query(Notify).filter(Notify.id == notify_id).first()
+    db_notify = get(db,id)
     if not db_notify:
         raise HTTPException(status_code=404, detail="Notification Method not found")
     db.delete(db_notify)
