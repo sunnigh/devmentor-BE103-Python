@@ -17,7 +17,7 @@ def get(db: Session, event_id: int):
     return db.query(Event).filter(Event.id == event_id).first()
 
 def update(db: Session, event_id: int, event_update: EventUpdate):
-    db_event = db.query(Event).filter(Event.id == event_id).first()
+    db_event = get(db, event_id)
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
     for key, value in event_update.dict().items():
@@ -27,7 +27,7 @@ def update(db: Session, event_id: int, event_update: EventUpdate):
     return db_event
 
 def delete(db: Session, event_id: int):
-    db_event = db.query(Event).filter(Event.id == event_id).first()
+    db_event = get(db, event_id)
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
     db.delete(db_event)
