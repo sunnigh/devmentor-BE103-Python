@@ -21,6 +21,7 @@ def list_post(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 # [POST] /v1/posts
 @router.post("/")
 def create_post(post: PostCreate, db: Session = Depends(get_db)):
+
     return repository.post.create(db=db, post=post)
 
 # 取得特定
