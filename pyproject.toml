@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Jonny <ji394su311203106@gmail.com>"]
 readme = "README.md"
-packages = [{include = "devmentor_be103_python"}]
+packages = [{include = "devmentor-BE103-Python"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
