@@ -25,12 +25,10 @@ def upgrade() -> None:
         sa.Column('user_name', sa.String(length=255), nullable=False),
         sa.Column('account', sa.String(length=255), nullable=False),
         sa.Column('password', sa.String(length=255), nullable=False),
-        sa.Column('is_login', sa.String(length=255), nullable=False),
+        sa.Column('is_login', sa.Boolean(), nullable=False,default=False),
         sa.Column('language', sa.String(length=255), nullable=False)
     )
-    pass
 
 
 def downgrade() -> None:
     op.drop_table('users')
-    pass

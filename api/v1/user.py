@@ -2,10 +2,12 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 import repository.user
 from infrastructure.mysql import get_db
-from infrastructure.token import create_access_token
+import infrastructure.token
+# from infrastructure.token import get_current_active_user
 from schema.database.user import UserCreate, UserUpdate,Token,UserBase
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from typing import Annotated
+from datetime import timedelta
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")  #相對URL
 
@@ -58,10 +60,10 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=infrastructure.token.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+    access_token = infrastructure.token.create_access_token(
+        data={"sub": user.user_name}, expires_delta=access_token_expires
     )
-    return Token(access_token=access_token, token_type="bearer")
+    return Token(access_token=access_token, token_type="bearer", is_login=True)
 
 @router.post("/register")
 async def register_user(user: UserCreate, db: Session = Depends(get_db)):

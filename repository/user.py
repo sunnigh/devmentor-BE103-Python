@@ -10,13 +10,14 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def lists(db: Session, skip: int = 0, limit: int = 100):
     return db.query(User).offset(skip).limit(limit).all()
 
-def create(db: Session, user: UserCreate): # 建立使用者
+def create(db: Session , user: UserCreate): # 建立使用者
+    # hashed_password = get_password_hash(user.password)
     # db_user = User(**user.dict())
     # db.add(db_user)
     # db.commit()
     # db.refresh(db_user)
     # return db_user
-    ############################
+    # ############################
     hashed_password = get_password_hash(user.password)
     db_user = User(
         user_name=user.user_name,
@@ -31,7 +32,7 @@ def create(db: Session, user: UserCreate): # 建立使用者
     return db_user
 
 def get(db: Session, user_id: int):
-    db_user = db.query(User).filter(User.id == user_id).first()
+    db_user = db.query(User).filter(User.user_id == user_id).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
@@ -72,45 +73,15 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 def get_user(db: Session, username: str):
-    return db.query(models.User).filter(models.User.username == username).first()
+    return db.query(User).filter(User.user_name == username).first()
 
 def authenticate_user(db: Session, username: str, password: str):
     user = get_user(db, username)
     if not user:
         return False
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(password, user.password):
         return False
+    user.is_login = True
+    db.commit()
+    db.refresh(user)
     return user
-
-# def encrypt_password(password: str) -> str:
-#     return Fernet.encrypt(password.encode()).decode()
-#
-# def decrypt_password(encrypted_password: str) -> str:
-#     return Fernet.decrypt(encrypted_password.encode()).decode()
-#
-# def authenticate_user(db: Session, username: str, password: str):
-#     user = get_user(db, username)
-#     if not user:
-#         return False
-#     if not decrypt_password(user.hashed_password) == password:
-#         return False
-#     return user
-
-# def create(db: Session, user: UserCreate): # 建立使用者
-    # db_user = User(**user.dict())
-    # db.add(db_user)
-    # db.commit()
-    # db.refresh(db_user)
-    # return db_user
-    # hashed_password = encrypt_password(user.password)
-    # db_user = User(
-    #     username=user.username,
-    #     account=user.account,
-    #     password=hashed_password,
-    #     is_login=False,
-    #     language=user.language,
-    # )
-    # db.add(db_user)
-    # db.commit()
-    # db.refresh(db_user)
-    # return db_user

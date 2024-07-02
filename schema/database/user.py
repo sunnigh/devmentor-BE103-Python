@@ -11,7 +11,7 @@ class UserCreate(UserBase):
     pass
 
 class User(UserBase):
-    id: int
+    user_id: int
 
     class Config:
         orm_mode: True
@@ -29,6 +29,7 @@ class UserInDB(UserBase):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    is_login: bool
 
 class TokenData(BaseModel):
     user_name: str | None = None
