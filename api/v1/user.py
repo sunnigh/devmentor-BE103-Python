@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 import repository.user
 from infrastructure.mysql import get_db
-import infrastructure.token
 # from infrastructure.token import get_current_active_user
 from schema.database.user import UserCreate, UserUpdate,Token,UserBase
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from typing import Annotated
 from datetime import timedelta
+from service.user import login_for_access_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")  #相對URL
 
@@ -48,22 +48,11 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     return repository.user.delete(db, user_id)
 ################################################################################
 @router.post("/token", response_model=Token)
-async def login_for_access_token(
+async def log_in_with_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db)
 ):
-    user = repository.user.authenticate_user(db, form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=infrastructure.token.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = infrastructure.token.create_access_token(
-        data={"sub": user.user_name}, expires_delta=access_token_expires
-    )
-    return Token(access_token=access_token, token_type="bearer", is_login=True)
+    return login_for_access_token(db, form_data.username, form_data.password)
 
 @router.post("/register")
 async def register_user(user: UserCreate, db: Session = Depends(get_db)):
