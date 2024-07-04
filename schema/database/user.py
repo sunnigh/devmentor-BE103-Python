@@ -17,10 +17,13 @@ class User(UserBase):
         orm_mode: True
 
 class UserUpdate(UserBase):
+    # user_name: str | None = None
+    # # account: str | None = None
+    # password: str | None = None
+    # # is_login: bool | None = None
+    # language: str | None = None
     user_name: str | None = None
-    account: str | None = None
     password: str | None = None
-    is_login: bool | None = None
     language: str | None = None
 
 class UserInDB(UserBase):

@@ -3,6 +3,7 @@ from database.user import User
 from schema.database.user import UserCreate, UserUpdate
 from fastapi import HTTPException
 from cryptography.fernet import Fernet
+from service.user import get_password_hash
 
 
 def lists(db: Session, skip: int = 0, limit: int = 100):
@@ -29,11 +30,17 @@ def get(db: Session, user_id: int):
     return db_user
 
 def update(db: Session, user_id: int, user_update: UserUpdate):
-    db_user = db.query(User).filter(User.id == user_id).first()
+    db_user = get(db, user_id)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
-    for key, value in user_update.dict().items():
-        setattr(db_user, key, value)
+
+    if not db_user.is_login:
+        raise HTTPException(status_code=403, detail="User is not log in")
+
+    db_user.password = get_password_hash(user_update.password)
+    db_user.user_name = user_update.user_name
+    db_user.language = user_update.language
+
     db.commit()
     db.refresh(db_user)
     return db_user
