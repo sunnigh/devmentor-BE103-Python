@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 import repository.user
 from infrastructure.mysql import get_db
-# from infrastructure.token import get_current_active_user
 from schema.database.user import UserCreate, UserUpdate,Token,UserBase
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from typing import Annotated
