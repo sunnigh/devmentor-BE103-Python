@@ -8,10 +8,10 @@ from database.user import User
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from infrastructure.mysql import get_db
 from schema.database.user import UserInDB,Token
-from passlib.context import CryptContext
 from repository.user import get_user
+from utility.auth import verify_password
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
@@ -42,22 +42,9 @@ def login_for_access_token(db: Session, username: str, password: str) -> Token:
 
 
 
-def verify_password(plain_password, hashed_password):
-    """
-    驗證密碼
-    :param plain_password:
-    :param hashed_password:
-    :return:
-    """
-    return pwd_context.verify(plain_password, hashed_password)
 
-def get_password_hash(password):
-    """
-    將密碼hash加密
-    :param password:
-    :return:
-    """
-    return pwd_context.hash(password)
+
+
 
 
 

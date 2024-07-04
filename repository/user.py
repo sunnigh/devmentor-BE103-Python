@@ -2,8 +2,8 @@ from sqlalchemy.orm import Session
 from database.user import User
 from schema.database.user import UserCreate, UserUpdate
 from fastapi import HTTPException
-from cryptography.fernet import Fernet
-from service.user import get_password_hash
+
+from utility.auth import get_password_hash
 
 
 def lists(db: Session, skip: int = 0, limit: int = 100):
