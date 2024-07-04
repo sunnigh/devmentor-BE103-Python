@@ -22,12 +22,6 @@ def list_user(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = repository.user.lists(db, skip=skip, limit=limit)
     return users
 
-# 新增
-# [POST] /v1/users
-# @router.post("/")   等同@router.post("/register")
-# def create_user(user: UserCreate, db: Session = Depends(get_db)):
-#     return repository.user.create(db=db, user=user)
-
 # 取得特定
 # [GET] /v1/users/{id}
 @router.get("/{user_id}")

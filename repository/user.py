@@ -11,13 +11,6 @@ def lists(db: Session, skip: int = 0, limit: int = 100):
     return db.query(User).offset(skip).limit(limit).all()
 
 def create(db: Session , user: UserCreate): # 建立使用者
-    # hashed_password = get_password_hash(user.password)
-    # db_user = User(**user.dict())
-    # db.add(db_user)
-    # db.commit()
-    # db.refresh(db_user)
-    # return db_user
-    # ############################
     hashed_password = get_password_hash(user.password)
     db_user = User(
         user_name=user.user_name,
