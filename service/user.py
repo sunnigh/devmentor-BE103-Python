@@ -9,6 +9,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from infrastructure.mysql import get_db
 from schema.database.user import UserInDB,Token
 from passlib.context import CryptContext
+from repository.user import get_user
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -58,8 +59,7 @@ def get_password_hash(password):
     """
     return pwd_context.hash(password)
 
-def get_user(db: Session, username: str):
-    return db.query(User).filter(User.user_name == username).first()
+
 
 def authenticate_user(db: Session, username: str, password: str):
     user = get_user(db, username)

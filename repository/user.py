@@ -48,4 +48,7 @@ def delete(db: Session, user_id: int):
     db.commit()
     return db_user
 
+def get_user(db: Session, username: str):
+    return db.query(User).filter(User.user_name == username).first()
+
 
