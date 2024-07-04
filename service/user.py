@@ -41,13 +41,7 @@ def login_for_access_token(db: Session, username: str, password: str) -> Token:
     )
     return Token(access_token=access_token, token_type="bearer", is_login=True)
 
-def delete(db: Session, user_id: int):
-    db_user = db.query(User).filter(User.id == user_id).first()
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-    db.delete(db_user)
-    db.commit()
-    return db_user
+
 
 def verify_password(plain_password, hashed_password):
     """

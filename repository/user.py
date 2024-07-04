@@ -31,9 +31,6 @@ def get(db: Session, user_id: int):
 
 def update(db: Session, user_id: int, user_update: UserUpdate):
     db_user = get(db, user_id)
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-
     if not db_user.is_login:
         raise HTTPException(status_code=403, detail="User is not log in")
 
@@ -43,6 +40,12 @@ def update(db: Session, user_id: int, user_update: UserUpdate):
 
     db.commit()
     db.refresh(db_user)
+    return db_user
+
+def delete(db: Session, user_id: int):
+    db_user = get(db, user_id)
+    db.delete(db_user)
+    db.commit()
     return db_user
 
 
