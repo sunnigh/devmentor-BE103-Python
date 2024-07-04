@@ -8,7 +8,7 @@ from typing import Annotated
 from datetime import timedelta
 from service.user import login_for_access_token
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")  #相對URL
+
 
 router = APIRouter(
     tags=["user"],
