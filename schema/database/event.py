@@ -9,7 +9,7 @@ class EventCreate(EventBase):
     pass
 
 class EventUpdate(BaseModel):
-    date: date | None = None
+    date: date
 
 class Event(EventBase):
     id: int

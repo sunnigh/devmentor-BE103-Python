@@ -6,9 +6,9 @@ class Notify(Base):
     __tablename__ = "notification_methods"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.user_id', ondelete='CASCADE'), nullable=False)
     type = Column(String(255), nullable=False)
     data = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True)
 
-    user = relationship("User", back_populates="notification_methods")
+    # user = relationship("user", back_populates="notification_methods")

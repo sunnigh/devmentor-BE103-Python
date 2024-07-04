@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 class UserBase(BaseModel):
-    username: str
+    user_name: str
     account: str
     password: str
     is_login: bool
@@ -11,7 +11,28 @@ class UserCreate(UserBase):
     pass
 
 class User(UserBase):
-    pass
+    user_id: int
+
+    class Config:
+        orm_mode: True
 
 class UserUpdate(UserBase):
-    pass
+    # user_name: str | None = None
+    # # account: str | None = None
+    # password: str | None = None
+    # # is_login: bool | None = None
+    # language: str | None = None
+    user_name: str | None = None
+    password: str | None = None
+    language: str | None = None
+
+class UserInDB(UserBase):
+    hashed_password: str | None = None
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    is_login: bool
+
+class TokenData(BaseModel):
+    user_name: str | None = None
