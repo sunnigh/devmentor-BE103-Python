@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from database.user import User
 from schema.database.user import UserCreate, UserUpdate
-from fastapi import HTTPException, Depends, status
+from fastapi import HTTPException, status
 
-from service.user import get_current_user, oauth2_scheme
+from service.user import get_current_user
 from utility.auth import get_password_hash
 
 
@@ -33,10 +33,10 @@ def get(db: Session, user_id: int):
     return db_user
 
 
-def update(db: Session, user_id: int, user_update: UserUpdate,token):
+def update(db: Session, user_id: int, user_update: UserUpdate, token):
     db_user = get(db, user_id)
     current_user = get_current_user(db, token)
-    if not current_user:
+    if current_user.username != db_user.user_name:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
 
     db_user.password = get_password_hash(user_update.password)

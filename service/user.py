@@ -1,14 +1,11 @@
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
-
 import jwt
 from jwt.exceptions import InvalidTokenError
 from fastapi import HTTPException, status, Depends
 from schema.database.user import TokenData
 from sqlalchemy.orm import Session
-from database.user import User
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from infrastructure.mysql import get_db
 from schema.database.user import UserInDB, Token
 from utility.auth import verify_password, get_user
 
@@ -68,7 +65,4 @@ def get_current_user(db: Session, token: Annotated[str, Depends(oauth2_scheme)])
         token_data = TokenData(username=username)
     except InvalidTokenError:
         raise credentials_exception
-    user = get_user(db, username=token_data.username)
-    if user is None:
-        raise credentials_exception
-    return user
+    return token_data
