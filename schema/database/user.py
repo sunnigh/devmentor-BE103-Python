@@ -35,4 +35,4 @@ class Token(BaseModel):
     is_login: bool
 
 class TokenData(BaseModel):
-    user_name: str | None = None
+    username: str | None = None
