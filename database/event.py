@@ -8,6 +8,6 @@ class Event(Base):
     event_id = Column(Integer, primary_key=True, index=True)
     event_date = Column(Date, nullable=False)
 
-    # users = relationship("User", secondary="event_subscribe_user", back_populates="event")
+    subscriptions = relationship("Subscribe", back_populates="event")
     # notification_methods = relationship("EventNotificationMethod", back_populates="event")
     # contents = relationship("ContentEvent", back_populates="event")

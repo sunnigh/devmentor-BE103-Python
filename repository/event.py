@@ -1,10 +1,15 @@
 from sqlalchemy.orm import Session
 from database.event import Event
-from schema.database.event import EventCreate, EventUpdate
-from fastapi import HTTPException
+from database.subscribes import Subscribe
+from schema.database.event import EventCreate, EventUpdate, EventSubscribe
+from fastapi import HTTPException, Depends
+
+from service.user import oauth2_scheme
+
 
 def lists(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Event).offset(skip).limit(limit).all()
+
 
 def create(db: Session, event: EventCreate):
     db_event = Event(**event.dict())
@@ -13,8 +18,10 @@ def create(db: Session, event: EventCreate):
     db.refresh(db_event)
     return db_event
 
+
 def get(db: Session, event_id: int):
     return db.query(Event).filter(Event.id == event_id).first()
+
 
 def update(db: Session, event_id: int, event_update: EventUpdate):
     db_event = get(db, event_id)
@@ -26,6 +33,7 @@ def update(db: Session, event_id: int, event_update: EventUpdate):
     db.refresh(db_event)
     return db_event
 
+
 def delete(db: Session, event_id: int):
     db_event = get(db, event_id)
     if not db_event:
@@ -33,3 +41,22 @@ def delete(db: Session, event_id: int):
     db.delete(db_event)
     db.commit()
     return db_event
+
+
+def subscribe(db: Session, event_id: int, subscribed_event: EventSubscribe, token: str = Depends(oauth2_scheme)):
+    current_user = get_current_user(db, token)
+
+    db_event = get(db, event_id)
+    if not db_event:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    existing_subscription = db.query(subscribed_event).filter_by(event_id=event_id, user_id=current_user.user_id).first()
+    if existing_subscription:
+        raise HTTPException(status_code=400, detail="Already subscribed to this event")
+
+    db_subscription = Subscribe(event_id=event_id, user_id=current_user.user_id)
+    db.add(db_subscription)
+    db.commit()
+    db.refresh(db_subscription)
+    return db_subscription
+
