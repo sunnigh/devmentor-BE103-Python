@@ -5,9 +5,10 @@ from jwt.exceptions import InvalidTokenError
 from fastapi import HTTPException, status, Depends
 from schema.database.user import TokenData
 from sqlalchemy.orm import Session
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from schema.database.user import UserInDB, Token
-from utility.auth import verify_password, get_user
+from fastapi.security import OAuth2PasswordBearer
+from schema.database.user import Token
+from utility.auth import verify_password
+from repository.user import get_user
 
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
