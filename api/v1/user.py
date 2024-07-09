@@ -2,11 +2,10 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 import repository.user
 from infrastructure.mysql import get_db
-from schema.database.user import UserCreate, UserUpdate, Token, UserBase
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from schema.database.user import UserCreate, UserUpdate, User
+from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
-from datetime import timedelta
-from service.user import login_for_access_token, oauth2_scheme
+from service.user import login_for_access_token, get_current_user
 
 router = APIRouter(
     tags=["user"],
@@ -31,9 +30,13 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
 
 # 更新特定
 # [PUT] /v1/users/{id}
+
 @router.put("/{user_id}")
-def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
-    return repository.user.update(db, user_id, user_update, token)
+def update_user(user_id: int,
+                user_update: UserUpdate,
+                db: Session = Depends(get_db),
+                current_user: User = Depends(get_current_user)):
+    return repository.user.update(db, user_id, user_update, current_user)
 
 
 # 刪除特定
@@ -44,7 +47,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 
 
 ################################################################################
-@router.post("/token", response_model=Token)
+@router.post("/token")
 async def log_in_with_token(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
         db: Session = Depends(get_db)

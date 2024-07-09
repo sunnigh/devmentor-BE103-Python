@@ -1,9 +1,8 @@
 from sqlalchemy.orm import Session
 from database.user import User
-from schema.database.user import UserCreate, UserUpdate
-from fastapi import HTTPException, status
+from schema.database.user import UserCreate, UserUpdate, User as PUser
+from fastapi import HTTPException, Depends
 
-from service.user import get_current_user
 from utility.auth import get_password_hash
 
 
@@ -33,16 +32,13 @@ def get(db: Session, user_id: int):
     return db_user
 
 
-def update(db: Session, user_id: int, user_update: UserUpdate, token):
+def update(db: Session, user_id: int, user_update: UserUpdate, current_user: PUser):
     db_user = get(db, user_id)
-    current_user = get_current_user(db, token)
-    if current_user.username != db_user.user_name:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
-
+    if db_user.user_name != current_user.user_name:
+        raise HTTPException(status_code=403, detail="Not authorized")
     db_user.password = get_password_hash(user_update.password)
     db_user.user_name = user_update.user_name
     db_user.language = user_update.language
-
     db.commit()
     db.refresh(db_user)
     return db_user
@@ -53,6 +49,7 @@ def delete(db: Session, user_id: int):
     db.delete(db_user)
     db.commit()
     return db_user
+
 
 def get_user(db: Session, username: str):
     return db.query(User).filter(User.user_name == username).first()
