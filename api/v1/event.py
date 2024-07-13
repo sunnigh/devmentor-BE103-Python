@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 import repository.event
 from infrastructure.mysql import get_db
 from schema.database.event import EventCreate, EventUpdate, EventSubscribe
+from service.user import get_current_user
+from schema.database.user import User
 
 router = APIRouter(
     tags=["event"],
@@ -51,6 +53,18 @@ def delete_event(event_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/{event_id}/subscribe")
-def subscribe_event(event_id: int, subscribe: EventSubscribe, db: Session = Depends(get_db),
-                    token: str = Depends(oauth2_scheme)):
-    return repository.event.subscribe(db, event_id, subscribe, token)
+def subscribe_event(event_id: int,
+                    subscribe: EventSubscribe,
+                    db: Session = Depends(get_db),
+                    current_user: User = Depends(get_current_user)
+                    ):
+    return repository.event.subscribe(db, event_id, subscribe, current_user)
+
+
+@router.delete("/{event_id}/subscribe")
+def cancel_subscribe_event(
+        event_id: int,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
+):
+    return repository.event.cancel_subscribe(db, event_id, current_user)

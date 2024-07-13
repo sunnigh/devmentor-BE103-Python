@@ -3,6 +3,7 @@ from database.event import Event
 from database.subscribes import Subscribe
 from schema.database.event import EventCreate, EventUpdate, EventSubscribe
 from fastapi import HTTPException, Depends
+from schema.database.user import User
 
 from service.user import oauth2_scheme
 
@@ -43,14 +44,13 @@ def delete(db: Session, event_id: int):
     return db_event
 
 
-def subscribe(db: Session, event_id: int, subscribed_event: EventSubscribe, token: str = Depends(oauth2_scheme)):
-    current_user = get_current_user(db, token)
-
+def subscribe(db: Session, event_id: int, subscribed_event: EventSubscribe, current_user: User):
     db_event = get(db, event_id)
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
 
-    existing_subscription = db.query(subscribed_event).filter_by(event_id=event_id, user_id=current_user.user_id).first()
+    existing_subscription = (db.query(subscribed_event).
+                             filter_by(event_id=event_id, user_id=current_user.user_id).first())
     if existing_subscription:
         raise HTTPException(status_code=400, detail="Already subscribed to this event")
 
@@ -60,3 +60,12 @@ def subscribe(db: Session, event_id: int, subscribed_event: EventSubscribe, toke
     db.refresh(db_subscription)
     return db_subscription
 
+
+def cancel_subscribe(db: Session, event_id: int, current_user: User):
+    subscription = db.query(Subscribe).filter_by(event_id=event_id, user_id=current_user.user_id).first()
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Subscription not found")
+
+    db.delete(subscription)
+    db.commit()
+    return subscription
