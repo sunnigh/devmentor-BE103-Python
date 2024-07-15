@@ -1,5 +1,7 @@
 from sqlalchemy import Boolean, Column, Integer, String
 from infrastructure.mysql import Base
+from sqlalchemy.orm import relationship
+
 
 class User(Base):
     __tablename__ = "users"
@@ -10,3 +12,5 @@ class User(Base):
     password = Column(String(255), nullable=False)
     is_login = Column(Boolean, nullable=False,default=False)
     language = Column(String(255), nullable=False)
+
+    subscriptions = relationship("Subscribe", back_populates="user")
