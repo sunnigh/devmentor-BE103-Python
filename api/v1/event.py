@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import repository.event
+import service.event
 from infrastructure.mysql import get_db
 from schema.database.event import EventCreate, EventUpdate, EventSubscribe
 from service.user import get_current_user
@@ -68,3 +69,13 @@ def cancel_subscribe_event(
         current_user: User = Depends(get_current_user)
 ):
     return repository.event.cancel_subscribe(db, event_id, current_user)
+
+
+@router.post("reserve")
+def event_reserve_course():
+    return service.event.reserve_course()
+
+
+@router.delete("reserve")
+def event_cancel_course():
+    return service.event.cancel_course()
