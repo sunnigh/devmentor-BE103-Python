@@ -1,4 +1,6 @@
 from sqlalchemy.orm import Session
+
+from database.content import Content
 from database.event import Event
 from database.subscribes import Subscribe
 from schema.database.event import EventCreate, EventUpdate, EventSubscribe
@@ -69,3 +71,22 @@ def cancel_subscribe(db: Session, event_id: int, current_user: User):
     db.delete(subscription)
     db.commit()
     return subscription
+
+
+def get_content_by_event_and_language(db: Session, event_id: int, language: str, current_user: User):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    content = db.query(Content).filter(Content.event_id == event_id, Content.language == language).first()
+    if not content:
+        raise HTTPException(status_code=404, detail="Content not found")
+    return {"contents_data": content.contents_data}
+
+
+def create_content(db: Session, event_id: int, language: str, contents_data: str, current_user: User):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    db_content = Content(event_id=event_id, language=language, contents_data=contents_data)
+    db.add(db_content)
+    db.commit()
+    db.refresh(db_content)
+    return {"message": "Content POST successfully"}

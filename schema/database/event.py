@@ -1,3 +1,4 @@
+from fastapi import Form
 from pydantic import BaseModel
 from datetime import date
 
@@ -23,6 +24,13 @@ class Event(EventBase):
 
 class EventSubscribe(BaseModel):
     user_id: int
+
+    class ContentCreate(BaseModel):
+        language: str
+        contents_data: str = Form(...)
+
+    class ContentResponse(BaseModel):
+        contents_data: str
 
     class Config:
         orm_mode: True
