@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
 import repository.event
 from infrastructure.mysql import get_db
@@ -66,5 +66,26 @@ def cancel_subscribe_event(
         event_id: int,
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
-):
+        ):
     return repository.event.cancel_subscribe(db, event_id, current_user)
+
+
+# 取得內容 event_id & language 到contents找資料
+@router.get("/{event_id}/{language}")
+def get_content(event_id: int,
+                language: str,
+                db: Session = Depends(get_db),
+                current_user: User = Depends(get_current_user)
+                ):
+    return repository.event.get_content_by_event_and_language(db, event_id, language, current_user)
+
+
+# 更新內容寫入event_id & language &content_data
+@router.post("/{event_id}/{language}")
+def post_content(event_id: int,
+                 language: str,
+                 contents_data: str = Form(...),
+                 db: Session = Depends(get_db),
+                 current_user: User = Depends(get_current_user)
+                 ):
+    return repository.event.create_content(db, event_id, language, contents_data, current_user)

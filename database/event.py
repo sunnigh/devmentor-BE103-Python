@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, Date
 from sqlalchemy.orm import relationship
 from infrastructure.mysql import Base
 
+
 class Event(Base):
     __tablename__ = "events"
 
@@ -10,4 +11,4 @@ class Event(Base):
 
     subscriptions = relationship("Subscribe", back_populates="event")
     # notification_methods = relationship("EventNotificationMethod", back_populates="event")
-    # contents = relationship("ContentEvent", back_populates="event")
+    contents = relationship("Content", back_populates="event")
