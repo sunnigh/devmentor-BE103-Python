@@ -24,12 +24,27 @@ def upgrade() -> None:
     op.drop_column('users', 'user_id')
 
     op.add_column('contents', sa.Column('id', sa.Integer, primary_key=True))
-    op.execute('UPDATE users SET id = contents_id')
+    op.execute('UPDATE contents SET id = contents_id')
     op.drop_column('contents', 'contents_id')
 
     op.add_column('notify_services', sa.Column('id', sa.Integer, primary_key=True))
-    op.execute('UPDATE users SET id = contents_id')
-    op.drop_column('contents', 'contents_id')
+    op.execute('UPDATE notify_services SET id = notify_service_id')
+    op.drop_column('notify_services', 'notify_service_id')
+
+    op.add_column('notification_methods', sa.Column('id', sa.Integer, primary_key=True))
+    op.execute('UPDATE notification_methods SET id = notificationmethod_id')
+    op.drop_column('notification_methods', 'notificationmethod_id')
+
+    op.add_column('events', sa.Column('id', sa.Integer, primary_key=True))
+    op.execute('UPDATE events SET id = event_id')
+    op.drop_column('events', 'event_id')
+
+    op.add_column('subscribes', sa.Column('id', sa.Integer, primary_key=True))
+    op.execute('UPDATE subscribes SET id = subscribe_id')
+    op.drop_column('subscribes', 'subscribe_id')
+
+
+
 
 
 def downgrade() -> None:
@@ -38,7 +53,23 @@ def downgrade() -> None:
     op.drop_column('users', 'id')
 
     op.add_column('contents', sa.Column('contents_id', sa.Integer, primary_key=True))
-    op.execute('UPDATE users SET contents_id = id')
+    op.execute('UPDATE contents SET contents_id = id')
     op.drop_column('contents', 'id')
+
+    op.add_column('notify_services', sa.Column('notify_service_id', sa.Integer, primary_key=True))
+    op.execute('UPDATE notify_services SET notify_service_id = id')
+    op.drop_column('notify_services', 'id')
+
+    op.add_column('notification_methods', sa.Column('notificationmethod_id', sa.Integer, primary_key=True))
+    op.execute('UPDATE notification_methods SET notificationmethod_id = id')
+    op.drop_column('notification_methods', 'id')
+
+    op.add_column('events', sa.Column('event_id', sa.Integer, primary_key=True))
+    op.execute('UPDATE events SET event_id = id')
+    op.drop_column('events', 'id')
+
+    op.add_column('subscribes', sa.Column('subscribe_id', sa.Integer, primary_key=True))
+    op.execute('UPDATE subscribes SET subscribe_id = id')
+    op.drop_column('subscribes', 'id')
 
 
