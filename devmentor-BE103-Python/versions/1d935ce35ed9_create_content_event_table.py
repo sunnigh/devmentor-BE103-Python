@@ -21,10 +21,10 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.create_table(
         'contents',
-        sa.Column('contents_id', sa.Integer, primary_key=True),
+        sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('language', sa.String(length=255), nullable=False),
         sa.Column('contents_data', sa.String(length=255), nullable=False),
-        sa.Column('event_id', sa.Integer, sa.ForeignKey('events.event_id', ondelete='CASCADE'), nullable=False)
+        sa.Column('event_id', sa.Integer,  nullable=False)
     )
     pass
 
