@@ -15,7 +15,7 @@ def lists(db: Session, skip: int = 0, limit: int = 100):
 
 
 def create(db: Session, event: EventCreate):
-    db_event = Event(**event.dict())
+    db_event = Event(event_date=event.date)
     db.add(db_event)
     db.commit()
     db.refresh(db_event)
