@@ -21,7 +21,7 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.create_table(
         'notify_services',
-        sa.Column('notify_service_id', sa.Integer, primary_key=True),
+        sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('event_id', sa.Integer,  nullable=False),
         sa.Column('notification_method_id', sa.Integer, nullable=False)
     )
