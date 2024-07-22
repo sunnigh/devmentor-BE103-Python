@@ -108,3 +108,8 @@ def get_notify_service(db: Session, event_id: int):
         raise HTTPException(status_code=404, detail="NotifyService not found")
     notification_method_ids = [service.notification_method_id for service in notify_services]
     return {"notification_method_id": notification_method_ids}
+
+
+def trigger_event(db, event_id, type):
+
+    return None

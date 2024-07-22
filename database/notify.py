@@ -9,6 +9,6 @@ class Notify(Base):
     user_id = Column(Integer, nullable=False)
     type = Column(String(255), nullable=False)
     data = Column(String(255), nullable=False)
-    is_active = Column(Boolean, default=True)
+
 
     # user = relationship("user", back_populates="notification_methods")

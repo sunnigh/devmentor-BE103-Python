@@ -1,3 +1,5 @@
+from typing import Dict
+
 from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
 import repository.event
@@ -101,3 +103,8 @@ def create_notify_service(event_id: int, notification_method_id: int, db: Sessio
 @router.get("/{event_id}/notify")
 def get_notify_service(event_id: int, db: Session = Depends(get_db)):
     return repository.event.get_notify_service(db, event_id)
+
+
+@router.post("/{event_id}/trigger")
+def trigger(event_id: int, notification: Dict[str, str], db: Session = Depends(get_db)):
+    return repository.event.trigger_event(db, event_id, type)
