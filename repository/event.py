@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 
 from database.content import Content
 from database.event import Event
+from database.notifyservice import NotifyService
 from database.subscribes import Subscribe
 from schema.database.event import EventCreate, EventUpdate, EventSubscribe
 from fastapi import HTTPException, Depends
@@ -90,3 +91,20 @@ def create_content(db: Session, event_id: int, language: str, contents_data: str
     db.commit()
     db.refresh(db_content)
     return {"message": "Content POST successfully"}
+
+
+def create_notify_service(db: Session, event_id: int, notification_method_id: int):
+    db_notify_service = NotifyService(event_id=event_id, notification_method_id=notification_method_id)
+    db.add(db_notify_service)
+    db.commit()
+    db.refresh(db_notify_service)
+    return {"message": "NotifyService POST successfully"}
+
+
+def get_notify_service(db: Session, event_id: int):
+    notify_services = (db.query(NotifyService).
+                       filter(NotifyService.event_id == event_id).all())
+    if not notify_services:
+        raise HTTPException(status_code=404, detail="NotifyService not found")
+    notification_method_ids = [service.notification_method_id for service in notify_services]
+    return {"notification_method_id": notification_method_ids}
