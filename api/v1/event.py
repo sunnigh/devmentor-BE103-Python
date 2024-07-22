@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
 import repository.event
 from infrastructure.mysql import get_db
-from schema.database.event import EventCreate, EventUpdate, EventSubscribe
+from schema.database.event import EventCreate, EventUpdate, EventSubscribe, EventTriggerRequest
 from service.user import get_current_user
 from schema.database.user import User
 
