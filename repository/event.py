@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session
-
 from database.content import Content
 from database.event import Event
 from database.notifyservice import NotifyService
@@ -110,6 +109,3 @@ def get_notify_service(db: Session, event_id: int):
     return {"notification_method_id": notification_method_ids}
 
 
-def trigger_event(db, event_id, type):
-
-    return None
