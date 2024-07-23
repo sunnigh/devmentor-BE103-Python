@@ -13,10 +13,10 @@ def trigger_event(db: Session, event_id: int, notification_type: str):
     if not subscriptions:
         raise HTTPException(status_code=404, detail="No subscriptions found for this event")
 
-    user_ids = [subscription.user_id for subscription in subscriptions]
     info_list = []
 
-    for user_id in user_ids:
+    for subscription in subscriptions:
+        user_id = subscription.user_id
         user = get_user_id(db, user_id)
         if not user:
             continue
