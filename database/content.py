@@ -9,6 +9,6 @@ class Content(Base):
     id = Column(Integer, primary_key=True)
     language = Column(String(255), nullable=False)
     contents_data = Column(String(255), nullable=False)
-    event_id = Column(Integer, ForeignKey('events.event_id', ondelete='CASCADE'), nullable=False)
+    event_id = Column(Integer, nullable=False)
 
     # event = relationship("Event", back_populates="contents")

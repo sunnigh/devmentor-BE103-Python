@@ -26,7 +26,7 @@ def create(db: Session, user: UserCreate):  # 建立使用者
 
 
 def get(db: Session, user_id: int):
-    db_user = db.query(User).filter(User.user_id == user_id).first()
+    db_user = db.query(User).filter(User.id == user_id).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user

@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session
-
 from database.content import Content
 from database.event import Event
 from database.notifyservice import NotifyService
@@ -16,7 +15,7 @@ def lists(db: Session, skip: int = 0, limit: int = 100):
 
 
 def create(db: Session, event: EventCreate):
-    db_event = Event(**event.dict())
+    db_event = Event(event_date=event.date)
     db.add(db_event)
     db.commit()
     db.refresh(db_event)
@@ -108,3 +107,5 @@ def get_notify_service(db: Session, event_id: int):
         raise HTTPException(status_code=404, detail="NotifyService not found")
     notification_method_ids = [service.notification_method_id for service in notify_services]
     return {"notification_method_id": notification_method_ids}
+
+

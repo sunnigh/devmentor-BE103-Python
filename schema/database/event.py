@@ -25,12 +25,18 @@ class Event(EventBase):
 class EventSubscribe(BaseModel):
     user_id: int
 
-    class ContentCreate(BaseModel):
-        language: str
-        contents_data: str = Form(...)
 
-    class ContentResponse(BaseModel):
-        contents_data: str
+class ContentCreate(BaseModel):
+    language: str
+    contents_data: str = Form(...)
+
+
+class ContentResponse(BaseModel):
+    contents_data: str
 
     class Config:
         orm_mode: True
+
+
+class EventTriggerRequest(BaseModel):
+    type: str

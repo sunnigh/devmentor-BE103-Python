@@ -57,4 +57,5 @@ async def log_in_with_token(
 
 @router.post("/register")
 async def register_user(user: UserCreate, db: Session = Depends(get_db)):
+    print("user is here:",user)
     return repository.user.create(db, user)
