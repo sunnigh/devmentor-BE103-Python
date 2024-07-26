@@ -52,11 +52,11 @@ def subscribe(db: Session, event_id: int, subscribed_event: EventSubscribe, curr
         raise HTTPException(status_code=404, detail="Event not found")
 
     existing_subscription = (db.query(Subscribe).
-                             filter_by(event_id=event_id, user_id=current_user.user).first())
+                             filter_by(event_id=event_id, user_id=current_user.id).first())
     if existing_subscription:
         raise HTTPException(status_code=400, detail="Already subscribed to this event")
 
-    db_subscription = Subscribe(event_id=event_id, user_id=current_user.user)
+    db_subscription = Subscribe(event_id=event_id, user_id=current_user.id)
     db.add(db_subscription)
     db.commit()
     db.refresh(db_subscription)
