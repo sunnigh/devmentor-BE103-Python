@@ -1,6 +1,8 @@
+from datetime import datetime
 from sqlalchemy.orm import Session
 from database.content import Content
 from database.notifyservice import NotifyService
+from database.sendlog import SendLog
 from database.subscribes import Subscribe
 from database.notify import Notify
 from fastapi import HTTPException
@@ -35,6 +37,9 @@ def trigger_event(db: Session, event_id: int, notification_type: str):
         db.commit()
         db.refresh(db_notify_service)
 
+        # 填入send_log table
+        make_send_log(db, event_id, user_id, notification_type, datetime.now().date())
+
         content = db.query(Content).filter(Content.event_id == event_id, Content.language == language).first()
         if not content:
             continue
@@ -51,3 +56,40 @@ def trigger_log(event_id: int, db: Session):
         raise HTTPException(status_code=404, detail="Event not found")
 
     return {"Trigger times": trigger_count}
+
+
+def make_send_log(db: Session, event_id: int, user_id: int, notification_method: str, date: datetime):
+    send_log = SendLog(
+        event_id=event_id,
+        user_id=user_id,
+        notification_method=notification_method,
+        date=date
+    )
+    db.add(send_log)
+    db.commit()
+    db.refresh(send_log)
+
+
+def get_send_log(event_id: int, db: Session):
+    send_times = db.query(SendLog).filter(SendLog.event_id == event_id).count()
+    if send_times == 0:
+        raise HTTPException(status_code=404, detail="No send logs found for this event")
+    return {
+        "event_id": event_id,
+        "total send times": send_times
+    }
+
+
+def get_send_log_list(db: Session, event_id: int):
+    sendlogs = db.query(SendLog).filter(SendLog.event_id == event_id).all()
+    if not sendlogs:
+        return None
+    sendlog_list = []
+    for sendlog in sendlogs:
+        sendlog_list.append({
+            "event_id": sendlog.event_id,
+            "user_id": sendlog.user_id,
+            "notification_method": sendlog.notification_method,
+            "date": sendlog.date
+        })
+    return sendlog_list

@@ -1,4 +1,4 @@
-from service.event import trigger_event, trigger_log
+from service.event import trigger_event, trigger_log, get_send_log, get_send_log_list
 from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
 import repository.event
@@ -111,4 +111,14 @@ def trigger(event_id: int, notification: EventTriggerRequest, db: Session = Depe
 @router.get("/{event_id}/trigger")
 def get_trigger_log(event_id: int, db: Session = Depends(get_db)):
     return trigger_log(event_id, db)
+
+
+@router.get("/{event_id}/sendlog")
+def send_log(event_id: int, db: Session = Depends(get_db)):
+    return get_send_log(event_id, db)
+
+
+@router.get("/{event_id}/sendloglist")
+def sendlog_list(event_id: int, db: Session = Depends(get_db)):
+    return get_send_log_list(db, event_id)
 
