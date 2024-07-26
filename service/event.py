@@ -43,3 +43,11 @@ def trigger_event(db: Session, event_id: int, notification_type: str):
         info_list.append({"username": username, "content_data": content_data, "notification_data": notification_data})
 
     return {"info": info_list}
+
+
+def trigger_log(event_id: int, db: Session):
+    trigger_count = db.query(NotifyService).filter(NotifyService.event_id == event_id).count()
+    if trigger_count is None:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    return {"Trigger times": trigger_count}

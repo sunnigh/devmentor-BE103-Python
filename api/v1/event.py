@@ -1,5 +1,4 @@
-from typing import Dict
-from service.event import trigger_event
+from service.event import trigger_event, trigger_log
 from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
 import repository.event
@@ -42,7 +41,6 @@ def get_event(event_id: int, db: Session = Depends(get_db)):
 @router.put("/{event_id}")
 def update_event(event_id: int, event_update: EventUpdate, db: Session = Depends(get_db)):
     event = repository.event.update(db, event_id, event_update)
-
     return event
 
 
@@ -108,3 +106,9 @@ def get_notify_service(event_id: int, db: Session = Depends(get_db)):
 @router.post("/{event_id}/trigger")
 def trigger(event_id: int, notification: EventTriggerRequest, db: Session = Depends(get_db)):
     return trigger_event(db, event_id, notification.type)
+
+
+@router.get("/{event_id}/trigger")
+def get_trigger_log(event_id: int, db: Session = Depends(get_db)):
+    return trigger_log(event_id, db)
+
