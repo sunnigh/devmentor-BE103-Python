@@ -7,6 +7,7 @@ class SendLog(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     event_id = Column(Integer, nullable=False)
+    event_content = Column(Integer, nullable=False)
     user_id = Column(Integer, nullable=False)
     notification_method = Column(Integer, nullable=False)
     date = Column(Date, nullable=False)
