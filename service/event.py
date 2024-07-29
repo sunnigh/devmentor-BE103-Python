@@ -8,7 +8,7 @@ from database.notify import Notify
 from fastapi import HTTPException
 from database.user import User
 from repository.user import get as get_user_id
-from utility.auth import send_email
+from utility.notify import send_email
 
 
 def trigger_event(db: Session, event_id: int, notification_type: str):
@@ -39,13 +39,13 @@ def trigger_event(db: Session, event_id: int, notification_type: str):
         db.refresh(db_notify_service)
 
         # 填入send_log table
-        make_send_log(db, event_id, user_id, notification_type, datetime.now().date())
 
         content = db.query(Content).filter(Content.event_id == event_id, Content.language == language).first()
         if not content:
             continue
         content_data = content.contents_data
 
+        make_send_log(db, event_id, user_id, notification_type, datetime.now().date(), content_data)
         send_email(notification_data, username, content_data)
 
         info_list.append({"username": username, "content_data": content_data, "notification_data": notification_data})
@@ -61,12 +61,18 @@ def trigger_log(event_id: int, db: Session):
     return {"Trigger times": trigger_count}
 
 
-def make_send_log(db: Session, event_id: int, user_id: int, notification_method: str, date: datetime):
+def make_send_log(db: Session,
+                  event_id: int,
+                  user_id: int,
+                  notification_method: str,
+                  date: datetime,
+                  event_content: str):
     send_log = SendLog(
         event_id=event_id,
         user_id=user_id,
         notification_method=notification_method,
-        date=date
+        date=date,
+        event_content=event_content
     )
     db.add(send_log)
     db.commit()
@@ -77,13 +83,6 @@ def get_send_log(event_id: int, db: Session):
     send_times = db.query(SendLog).filter(SendLog.event_id == event_id).count()
     if send_times == 0:
         raise HTTPException(status_code=404, detail="No send logs found for this event")
-    return {
-        "event_id": event_id,
-        "total send times": send_times
-    }
-
-
-def get_send_log_list(db: Session, event_id: int):
     sendlogs = db.query(SendLog).filter(SendLog.event_id == event_id).all()
     if not sendlogs:
         return None
@@ -93,6 +92,14 @@ def get_send_log_list(db: Session, event_id: int):
             "event_id": sendlog.event_id,
             "user_id": sendlog.user_id,
             "notification_method": sendlog.notification_method,
-            "date": sendlog.date
+            "date": sendlog.date,
+            "event_content": sendlog.event_content,
         })
-    return sendlog_list
+    return {
+        "event_id": event_id,
+        "total send times": send_times,
+        "sendlog_list": sendlog_list
+    }
+
+
+
