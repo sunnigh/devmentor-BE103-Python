@@ -8,6 +8,7 @@ from database.notify import Notify
 from fastapi import HTTPException
 from database.user import User
 from repository.user import get as get_user_id
+from utility.auth import send_email
 
 
 def trigger_event(db: Session, event_id: int, notification_type: str):
@@ -44,6 +45,8 @@ def trigger_event(db: Session, event_id: int, notification_type: str):
         if not content:
             continue
         content_data = content.contents_data
+
+        send_email(notification_data, username, content_data)
 
         info_list.append({"username": username, "content_data": content_data, "notification_data": notification_data})
 

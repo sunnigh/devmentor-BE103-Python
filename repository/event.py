@@ -30,8 +30,7 @@ def update(db: Session, event_id: int, event_update: EventUpdate):
     db_event = get(db, event_id)
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
-    for key, value in event_update.dict().items():
-        setattr(db_event, key, value)
+    db_event.date = event_update.date
     db.commit()
     db.refresh(db_event)
     return db_event
@@ -51,12 +50,12 @@ def subscribe(db: Session, event_id: int, subscribed_event: EventSubscribe, curr
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
 
-    existing_subscription = (db.query(subscribed_event).
-                             filter_by(event_id=event_id, user_id=current_user.user_id).first())
+    existing_subscription = (db.query(Subscribe).
+                             filter_by(event_id=event_id, user_id=current_user.id).first())
     if existing_subscription:
         raise HTTPException(status_code=400, detail="Already subscribed to this event")
 
-    db_subscription = Subscribe(event_id=event_id, user_id=current_user.user_id)
+    db_subscription = Subscribe(event_id=event_id, user_id=current_user.id)
     db.add(db_subscription)
     db.commit()
     db.refresh(db_subscription)
@@ -64,7 +63,7 @@ def subscribe(db: Session, event_id: int, subscribed_event: EventSubscribe, curr
 
 
 def cancel_subscribe(db: Session, event_id: int, current_user: User):
-    subscription = db.query(Subscribe).filter_by(event_id=event_id, user_id=current_user.user_id).first()
+    subscription = db.query(Subscribe).filter_by(event_id=event_id, user_id=current_user.id).first()
     if not subscription:
         raise HTTPException(status_code=404, detail="Subscription not found")
 
