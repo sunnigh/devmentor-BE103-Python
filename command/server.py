@@ -17,6 +17,7 @@ class ServerCreator:
         origins = [
             "http://localhost",
             "http://127.0.0.1",
+            "http://127.0.0.1:8008",
         ]
 
         self.app.add_middleware(
