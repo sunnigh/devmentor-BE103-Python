@@ -48,7 +48,7 @@
                 const password = document.getElementById('password').value;
 
                 try {
-                    const response = await axios.post('127.0.0.1:8008/v1/users/token', new URLSearchParams({
+                    const response = await axios.post('http://localhost:8009/v1/users/token', new URLSearchParams({
                         username: username,
                         password: password
                     }));
