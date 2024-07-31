@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-
 from database.content import Content
 from database.event import Event
+from database.notifyservice import NotifyService
 from database.subscribes import Subscribe
 from schema.database.event import EventCreate, EventUpdate, EventSubscribe
 from fastapi import HTTPException, Depends
@@ -30,8 +30,7 @@ def update(db: Session, event_id: int, event_update: EventUpdate):
     db_event = get(db, event_id)
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
-    for key, value in event_update.dict().items():
-        setattr(db_event, key, value)
+    db_event.date = event_update.date
     db.commit()
     db.refresh(db_event)
     return db_event
@@ -51,12 +50,12 @@ def subscribe(db: Session, event_id: int, subscribed_event: EventSubscribe, curr
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
 
-    existing_subscription = (db.query(subscribed_event).
-                             filter_by(event_id=event_id, user_id=current_user.user_id).first())
+    existing_subscription = (db.query(Subscribe).
+                             filter_by(event_id=event_id, user_id=current_user.id).first())
     if existing_subscription:
         raise HTTPException(status_code=400, detail="Already subscribed to this event")
 
-    db_subscription = Subscribe(event_id=event_id, user_id=current_user.user_id)
+    db_subscription = Subscribe(event_id=event_id, user_id=current_user.id)
     db.add(db_subscription)
     db.commit()
     db.refresh(db_subscription)
@@ -64,7 +63,7 @@ def subscribe(db: Session, event_id: int, subscribed_event: EventSubscribe, curr
 
 
 def cancel_subscribe(db: Session, event_id: int, current_user: User):
-    subscription = db.query(Subscribe).filter_by(event_id=event_id, user_id=current_user.user_id).first()
+    subscription = db.query(Subscribe).filter_by(event_id=event_id, user_id=current_user.id).first()
     if not subscription:
         raise HTTPException(status_code=404, detail="Subscription not found")
 
@@ -90,3 +89,22 @@ def create_content(db: Session, event_id: int, language: str, contents_data: str
     db.commit()
     db.refresh(db_content)
     return {"message": "Content POST successfully"}
+
+
+def create_notify_service(db: Session, event_id: int, notification_method_id: int):
+    db_notify_service = NotifyService(event_id=event_id, notification_method_id=notification_method_id)
+    db.add(db_notify_service)
+    db.commit()
+    db.refresh(db_notify_service)
+    return {"message": "NotifyService POST successfully"}
+
+
+def get_notify_service(db: Session, event_id: int):
+    notify_services = (db.query(NotifyService).
+                       filter(NotifyService.event_id == event_id).all())
+    if not notify_services:
+        raise HTTPException(status_code=404, detail="NotifyService not found")
+    notification_method_ids = [service.notification_method_id for service in notify_services]
+    return {"notification_method_id": notification_method_ids}
+
+

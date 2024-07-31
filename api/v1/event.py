@@ -1,8 +1,9 @@
+from service.event import trigger_event, trigger_log, get_send_log
 from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
 import repository.event
 from infrastructure.mysql import get_db
-from schema.database.event import EventCreate, EventUpdate, EventSubscribe
+from schema.database.event import EventCreate, EventUpdate, EventSubscribe, EventTriggerRequest
 from service.user import get_current_user
 from schema.database.user import User
 
@@ -40,7 +41,6 @@ def get_event(event_id: int, db: Session = Depends(get_db)):
 @router.put("/{event_id}")
 def update_event(event_id: int, event_update: EventUpdate, db: Session = Depends(get_db)):
     event = repository.event.update(db, event_id, event_update)
-
     return event
 
 
@@ -71,7 +71,7 @@ def cancel_subscribe_event(
 
 
 # 取得內容 event_id & language 到contents找資料
-@router.get("/{event_id}/{language}")
+@router.get("/{event_id}/lang/{language}")
 def get_content(event_id: int,
                 language: str,
                 db: Session = Depends(get_db),
@@ -81,7 +81,7 @@ def get_content(event_id: int,
 
 
 # 更新內容寫入event_id & language &content_data
-@router.post("/{event_id}/{language}")
+@router.post("/{event_id}/lang/{language}")
 def post_content(event_id: int,
                  language: str,
                  contents_data: str = Form(...),
@@ -89,3 +89,31 @@ def post_content(event_id: int,
                  current_user: User = Depends(get_current_user)
                  ):
     return repository.event.create_content(db, event_id, language, contents_data, current_user)
+
+
+# 新增 notify_service
+@router.post("/{event_id}/notify/{notification_method_id}")
+def create_notify_service(event_id: int, notification_method_id: int, db: Session = Depends(get_db)):
+    return repository.event.create_notify_service(db, event_id, notification_method_id)
+
+
+# 取得 notify_service
+@router.get("/{event_id}/notify")
+def get_notify_service(event_id: int, db: Session = Depends(get_db)):
+    return repository.event.get_notify_service(db, event_id)
+
+
+@router.post("/{event_id}/trigger")
+def trigger(event_id: int, notification: EventTriggerRequest, db: Session = Depends(get_db)):
+    return trigger_event(db, event_id, notification.type)
+
+
+@router.get("/{event_id}/trigger")
+def get_trigger_log(event_id: int, db: Session = Depends(get_db)):
+    return trigger_log(event_id, db)
+
+
+@router.get("/{event_id}/sendlog")
+def send_log(event_id: int, db: Session = Depends(get_db)):
+    return get_send_log(event_id, db)
+

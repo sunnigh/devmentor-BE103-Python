@@ -11,7 +11,7 @@ class UserCreate(UserBase):
     pass
 
 class User(UserBase):
-    user_id: int
+    id: int
 
     class Config:
         orm_mode: True
