@@ -5,12 +5,13 @@ from jwt.exceptions import InvalidTokenError
 from fastapi import HTTPException, status, Depends
 from database.user import User
 from infrastructure.mysql import get_db
-from schema.database.user import TokenData
+from schema.database.notify import NotifyCreate
+from schema.database.user import TokenData, UserCreate, RegisterUserRequest
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer
 from schema.database.user import Token
 from utility.auth import verify_password
-
+import repository
 
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
@@ -87,3 +88,26 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session 
 
 def get_user(db: Session, username: str):
     return db.query(User).filter(User.user_name == username).first()
+
+
+# def register_user(user: UserCreate, email: str, db: Session = Depends(get_db)):
+#     print("user is here>>>>>>>>", user)
+#     db_user = repository.user.create(db, user)
+#
+#     notify_create = NotifyCreate(type="email", data=email, user_id=db_user.id)
+#     db_notify = repository.notify.create(db, notify_create)
+#
+#     return {"user": db_user, "notify": db_notify}
+
+
+async def register_user(request: RegisterUserRequest, db: Session = Depends(get_db)):
+    db_user = repository.user.create(db, request.user)
+    if not db_user:
+        raise HTTPException(status_code=400, detail="User creation failed")
+
+    notify_create = NotifyCreate(type="email", data=request.email, user_id=db_user.id)
+    db_notify = repository.notify.create(db, notify_create)
+    if not db_notify:
+        raise HTTPException(status_code=400, detail="Notification method creation failed")
+
+    return {"user": db_user, "notify": db_notify}
