@@ -100,7 +100,7 @@ def get_user(db: Session, username: str):
 #     return {"user": db_user, "notify": db_notify}
 
 
-async def register_user(request: RegisterUserRequest, db: Session = Depends(get_db)):
+def register_user(request: RegisterUserRequest, db: Session = Depends(get_db)):
     db_user = repository.user.create(db, request.user)
     if not db_user:
         raise HTTPException(status_code=400, detail="User creation failed")

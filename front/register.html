@@ -60,12 +60,13 @@
                 const email = document.getElementById('email').value;
 
                 try {
-                    const response = await axios.post('http://127.0.0.1:8015/v1/users/register', {
+                    const response = await axios.post('http://127.0.0.1:8016/v1/users/register', {
                         user: {
                             user_name: name,
                             account: username,
                             password: password,
-                            language: preferred_language
+                            language: preferred_language,
+                            is_login: false
                         },
                         email: email
                     });
