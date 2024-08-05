@@ -56,7 +56,8 @@
                 localStorage.setItem('accessToken', data.access_token);
 
                 alert('登入成功!');
-                // Redirect or perform other actions after successful login
+                // Redirect to event.html after successful login
+                window.location.href = 'event.html';
             } catch (error) {
                 console.error('Error:', error);
                 alert('發生錯誤，請重試。');
