@@ -54,11 +54,10 @@ def delete_event(event_id: int, db: Session = Depends(get_db)):
 
 @router.post("/{event_id}/subscribe")
 def subscribe_event(event_id: int,
-                    subscribe: EventSubscribe,
                     db: Session = Depends(get_db),
                     current_user: User = Depends(get_current_user)
                     ):
-    return repository.event.subscribe(db, event_id, subscribe, current_user)
+    return repository.event.subscribe(db, event_id, current_user)
 
 
 @router.delete("/{event_id}/subscribe")

@@ -45,7 +45,7 @@ def delete(db: Session, event_id: int):
     return db_event
 
 
-def subscribe(db: Session, event_id: int, subscribed_event: EventSubscribe, current_user: User):
+def subscribe(db: Session, event_id: int, current_user: User):
     db_event = get(db, event_id)
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
