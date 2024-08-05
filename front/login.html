@@ -16,8 +16,8 @@
                         <h2 class="card-title text-center mb-4">登入</h2>
                         <form id="login-form">
                             <div class="form-group">
-                                <label for="username">帳號</label>
-                                <input type="text" class="form-control" id="username" name="username" placeholder="請輸入帳號" required>
+                                <label for="username">使用者名稱</label>
+                                <input type="text" class="form-control" id="username" name="username" placeholder="請輸入使用者名稱" required>
                             </div>
                             <div class="form-group">
                                 <label for="password">密碼</label>
@@ -40,30 +40,27 @@
     <!-- Axios for making HTTP requests -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('login-form').addEventListener('submit', async function(event) {
-                event.preventDefault();
+        document.getElementById('login-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
 
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
 
-                try {
-                    const response = await axios.post('http://127.0.0.1:8000/v1/users/token', new URLSearchParams({
-                        username: username,
-                        password: password
-                    }));
+            try {
+                const response = await axios.post('http://127.0.0.1:8018/v1/users/token', new URLSearchParams({
+                    username: username,
+                    password: password
+                }));
 
-                    // Handle successful login (e.g., store the token, redirect to another page)
-                    console.log('Login successful:', response.data);
-                    alert('Login successful!');
-                    // You can redirect to another page or store the token in localStorage
-                    // window.location.href = '/some-protected-page.html';
-                } catch (error) {
-                    // Handle login error
-                    console.error('Error logging in:', error);
-                    alert('Login failed. Please check your username and password.');
-                }
-            });
+                const data = response.data;
+                localStorage.setItem('accessToken', data.access_token);
+
+                alert('登入成功!');
+                // Redirect or perform other actions after successful login
+            } catch (error) {
+                console.error('Error:', error);
+                alert('發生錯誤，請重試。');
+            }
         });
     </script>
 </body>
