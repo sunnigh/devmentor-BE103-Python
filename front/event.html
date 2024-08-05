@@ -18,8 +18,9 @@
         <thead>
         <tr>
             <th scope="col">Event ID</th>
-            <th scope="col">Event Content</th>
-            <th scope="col">Created At</th>
+            <th scope="col">Event Date</th>
+            <th scope="col">Content Language</th>
+            <th scope="col">Content Data</th>
             <th scope="col">Actions</th>
         </tr>
         </thead>
@@ -31,30 +32,41 @@
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script>
-    // Sample data
-    const events = [
-        {id: 1, content: 'Event 1', createdAt: '2024-01-01', subscribed: false},
-        {id: 2, content: 'Event 2', createdAt: '2024-01-02', subscribed: true},
-        // Add more events here
-    ];
+    const baseUrl = 'http://127.0.0.1:8018/v1';  // 替換成你的API基礎URL
+
+    // Function to fetch and render the event table
+    async function fetchAndRenderEvents() {
+        try {
+            const response = await fetch(`${baseUrl}/events`);
+            const events = await response.json();
+            renderTable(events);
+        } catch (error) {
+            console.error('Error fetching events:', error);
+        }
+    }
 
     // Function to render the event table
-    function renderTable() {
+    function renderTable(events) {
         const eventTable = $('#eventTable');
         eventTable.empty();
-        events.forEach(event => {
-            const row = `<tr class="clickable-row" data-href="event_detail.html?id=${event.id}">
-                <td>${event.id}</td>
-                <td>${event.content}</td>
-                <td>${event.createdAt}</td>
-                <td>
-                    <button class="btn btn-${event.subscribed ? 'danger' : 'primary'} btn-sm subscribe-btn" data-id="${event.id}">
-                        ${event.subscribed ? 'Unsubscribe' : 'Subscribe'}
-                    </button>
-                    <button class="btn btn-secondary btn-sm edit-btn" data-id="${event.id}">Edit</button>
-                </td>
-            </tr>`;
-            eventTable.append(row);
+        events.forEach(eventData => {
+            const event = eventData.event;
+            const contents = eventData.contents;
+            contents.forEach(content => {
+                const row = `<tr class="clickable-row" data-href="event_detail.html?id=${event.id}">
+                    <td>${event.id}</td>
+                    <td>${event.event_date}</td>
+                    <td>${content.language}</td>
+                    <td>${content.contents_data}</td>
+                    <td>
+                        <button class="btn btn-${event.subscribed ? 'danger' : 'primary'} btn-sm subscribe-btn" data-id="${event.id}">
+                            ${event.subscribed ? 'Unsubscribe' : 'Subscribe'}
+                        </button>
+                        <button class="btn btn-secondary btn-sm edit-btn" data-id="${event.id}">Edit</button>
+                    </td>
+                </tr>`;
+                eventTable.append(row);
+            });
         });
 
         // Add click event to rows
@@ -68,11 +80,16 @@
         });
 
         // Subscribe/Unsubscribe button event
-        $('.subscribe-btn').click(function() {
+        $('.subscribe-btn').click(async function() {
             const eventId = $(this).data('id');
-            const event = events.find(e => e.id === eventId);
+            const event = events.find(e => e.event.id === eventId).event;
+            if (event.subscribed) {
+                await cancelSubscribe(eventId);
+            } else {
+                await subscribe(eventId);
+            }
             event.subscribed = !event.subscribed;
-            renderTable();
+            renderTable(events);
         });
 
         // Edit button event
@@ -83,8 +100,44 @@
         });
     }
 
-    // Initial render
-    renderTable();
+    async function subscribe(eventId) {
+        try {
+            const response = await fetch(`${baseUrl}/events/${eventId}/subscribe`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ subscribe: true })
+            });
+            if (response.ok) {
+                alert('Subscribed successfully!');
+            } else {
+                const error = await response.json();
+                alert(`Error subscribing: ${error.detail}`);
+            }
+        } catch (error) {
+            console.error('Error subscribing:', error);
+        }
+    }
+
+    async function cancelSubscribe(eventId) {
+        try {
+            const response = await fetch(`${baseUrl}/events/${eventId}/subscribe`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                alert('Unsubscribed successfully!');
+            } else {
+                const error = await response.json();
+                alert(`Error unsubscribing: ${error.detail}`);
+            }
+        } catch (error) {
+            console.error('Error unsubscribing:', error);
+        }
+    }
+
+    // Initial fetch and render
+    fetchAndRenderEvents();
 </script>
 </body>
 </html>

@@ -17,7 +17,7 @@ router = APIRouter(
 # [GET] /v1/events
 @router.get("/")
 def list_event(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    events = repository.event.lists(db, skip=skip, limit=limit)
+    events = repository.event.list_event(db, skip=skip, limit=limit)
     return events
 
 

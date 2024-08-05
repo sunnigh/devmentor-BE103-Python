@@ -108,3 +108,10 @@ def get_notify_service(db: Session, event_id: int):
     return {"notification_method_id": notification_method_ids}
 
 
+def list_event(db: Session, skip: int = 0, limit: int = 100):
+    events = lists(db, skip, limit)
+    event_contents = []
+    for event in events:
+        contents = db.query(Content).filter(Content.event_id == event.id).all()
+        event_contents.append({"event": event, "contents": contents})
+    return event_contents
