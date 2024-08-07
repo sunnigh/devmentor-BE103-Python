@@ -31,7 +31,7 @@
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script>
-    const baseUrl = 'http://127.0.0.1:8019/v1';  // 替換成你的API基礎URL
+    const baseUrl = 'http://127.0.0.1:8021/v1';  // 替換成你的API基礎URL
     const eventId = new URLSearchParams(window.location.search).get('id');
     const token = localStorage.getItem('accessToken');
 
@@ -40,23 +40,25 @@
         window.location.href = 'login.html';
     }
 
-    async function fetchEventDetails() {
-        try {
-            const response = await fetch(`${baseUrl}/events/${eventId}/sendlog`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+async function fetchEventDetails() {
+    try {
+        const response = await fetch(`${baseUrl}/events/${eventId}/sendlog`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
-            const data = await response.json();
-            renderEventDetails(data);
-        } catch (error) {
-            console.error('Error fetching event details:', error);
-            alert('Error fetching event details');
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Network response was not ok: ${errorText}`);
         }
+        const data = await response.json();
+        renderEventDetails(data);
+    } catch (error) {
+        console.error('Error fetching event details:', error);
+        alert(`Error fetching event details: ${error.message}`);
     }
+}
+
 
     function renderEventDetails(data) {
         $('#eventId').text(data.event_id);

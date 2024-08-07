@@ -32,7 +32,10 @@
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script>
-    const baseUrl = 'http://127.0.0.1:8019/v1';  // 替換成你的API基礎URL
+    const baseUrl = 'http://127.0.0.1:8021/v1';  // 替換成你的API基礎URL
+
+    // 清除 localStorage 中的訂閱狀態
+    localStorage.removeItem('subscriptions');
 
     // Function to fetch and render the event table
     async function fetchAndRenderEvents() {
@@ -60,18 +63,22 @@
     function renderTable(events) {
         const eventTable = $('#eventTable');
         eventTable.empty();
+        const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '{}');
+
         events.forEach(eventData => {
             const event = eventData.event;
             const contents = eventData.contents;
+
             contents.forEach(content => {
+                const subscribed = subscriptions[event.id] || event.subscribed;
                 const row = `<tr class="clickable-row" data-href="event_detail.html?id=${event.id}">
                     <td>${event.id}</td>
                     <td>${event.event_date}</td>
                     <td>${content.language}</td>
                     <td>${content.contents_data}</td>
                     <td>
-                        <button class="btn btn-${event.subscribed ? 'danger' : 'primary'} btn-sm subscribe-btn" data-id="${event.id}">
-                            ${event.subscribed ? 'Unsubscribe' : 'Subscribe'}
+                        <button class="btn btn-${subscribed ? 'danger' : 'primary'} btn-sm subscribe-btn" data-id="${event.id}">
+                            ${subscribed ? 'Unsubscribe' : 'Subscribe'}
                         </button>
                         <button class="btn btn-secondary btn-sm edit-btn" data-id="${event.id}">Edit</button>
                     </td>
@@ -95,33 +102,25 @@
             const button = $(this);
             const eventId = button.data('id');
             const event = events.find(e => e.event.id === eventId).event;
-            const originalState = event.subscribed;
+            const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '{}');
 
-            // Attempt to subscribe/unsubscribe
-            if (event.subscribed) {
+            if (subscriptions[eventId] || event.subscribed) {
                 // Unsubscribe
                 const success = await cancelSubscribe(eventId);
                 if (success) {
-                    event.subscribed = false;
+                    subscriptions[eventId] = false;
+                    localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
                     button.text('Subscribe').removeClass('btn-danger').addClass('btn-primary');
-                } else {
-                    // Restore the original state if failed
-                    event.subscribed = true;
                 }
             } else {
                 // Subscribe
                 const success = await subscribe(eventId);
                 if (success) {
-                    event.subscribed = true;
+                    subscriptions[eventId] = true;
+                    localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
                     button.text('Unsubscribe').removeClass('btn-primary').addClass('btn-danger');
-                } else {
-                    // Restore the original state if failed
-                    event.subscribed = false;
                 }
             }
-
-            // Re-render the table to reflect the changes
-            renderTable(events);
         });
 
         // Edit button event
