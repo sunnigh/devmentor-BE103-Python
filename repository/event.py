@@ -115,3 +115,13 @@ def list_event(db: Session, skip: int = 0, limit: int = 100):
         contents = db.query(Content).filter(Content.event_id == event.id).all()
         event_contents.append({"event": event, "contents": contents})
     return event_contents
+
+
+def update_content(db, event_id, language, contents_data, current_user):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    db_content = db.query(Content).filter_by(event_id=event_id, language=language).first()
+    db_content.contents_data = contents_data
+    db.commit()
+    db.refresh(db_content)
+    return {"message": "Content updated successfully", "content": contents_data}

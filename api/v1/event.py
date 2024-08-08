@@ -65,7 +65,7 @@ def cancel_subscribe_event(
         event_id: int,
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
-        ):
+):
     return repository.event.cancel_subscribe(db, event_id, current_user)
 
 
@@ -116,3 +116,11 @@ def get_trigger_log(event_id: int, db: Session = Depends(get_db)):
 def send_log(event_id: int, db: Session = Depends(get_db)):
     return get_send_log(event_id, db)
 
+
+@router.put("/{event_id}/lang/{language}")
+def update_content(event_id: int,
+                   language: str,
+                   contents_data: str = Form(...),
+                   db: Session = Depends(get_db),
+                   current_user: User = Depends(get_current_user)):
+    return repository.event.update_content(db, event_id, language, contents_data, current_user)
