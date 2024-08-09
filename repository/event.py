@@ -45,7 +45,7 @@ def delete(db: Session, event_id: int):
     return db_event
 
 
-def subscribe(db: Session, event_id: int, subscribed_event: EventSubscribe, current_user: User):
+def subscribe(db: Session, event_id: int, current_user: User):
     db_event = get(db, event_id)
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
@@ -108,3 +108,20 @@ def get_notify_service(db: Session, event_id: int):
     return {"notification_method_id": notification_method_ids}
 
 
+def list_event(db: Session, skip: int = 0, limit: int = 100):
+    events = lists(db, skip, limit)
+    event_contents = []
+    for event in events:
+        contents = db.query(Content).filter(Content.event_id == event.id).all()
+        event_contents.append({"event": event, "contents": contents})
+    return event_contents
+
+
+def update_content(db, event_id, language, contents_data, current_user):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    db_content = db.query(Content).filter_by(event_id=event_id, language=language).first()
+    db_content.contents_data = contents_data
+    db.commit()
+    db.refresh(db_content)
+    return {"message": "Content updated successfully", "content": contents_data}

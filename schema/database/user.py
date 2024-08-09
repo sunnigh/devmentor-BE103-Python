@@ -36,3 +36,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+
+class RegisterUserRequest(BaseModel):
+    user: UserCreate
+    email: str

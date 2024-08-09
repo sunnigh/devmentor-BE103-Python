@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, Date
-from sqlalchemy.orm import relationship
 from infrastructure.mysql import Base
 
 

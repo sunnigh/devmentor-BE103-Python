@@ -17,7 +17,7 @@ router = APIRouter(
 # [GET] /v1/events
 @router.get("/")
 def list_event(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    events = repository.event.lists(db, skip=skip, limit=limit)
+    events = repository.event.list_event(db, skip=skip, limit=limit)
     return events
 
 
@@ -54,11 +54,10 @@ def delete_event(event_id: int, db: Session = Depends(get_db)):
 
 @router.post("/{event_id}/subscribe")
 def subscribe_event(event_id: int,
-                    subscribe: EventSubscribe,
                     db: Session = Depends(get_db),
                     current_user: User = Depends(get_current_user)
                     ):
-    return repository.event.subscribe(db, event_id, subscribe, current_user)
+    return repository.event.subscribe(db, event_id, current_user)
 
 
 @router.delete("/{event_id}/subscribe")
@@ -66,7 +65,7 @@ def cancel_subscribe_event(
         event_id: int,
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
-        ):
+):
     return repository.event.cancel_subscribe(db, event_id, current_user)
 
 
@@ -117,3 +116,11 @@ def get_trigger_log(event_id: int, db: Session = Depends(get_db)):
 def send_log(event_id: int, db: Session = Depends(get_db)):
     return get_send_log(event_id, db)
 
+
+@router.put("/{event_id}/lang/{language}")
+def update_content(event_id: int,
+                   language: str,
+                   contents_data: str = Form(...),
+                   db: Session = Depends(get_db),
+                   current_user: User = Depends(get_current_user)):
+    return repository.event.update_content(db, event_id, language, contents_data, current_user)
