@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 import repository.user
 from infrastructure.mysql import get_db
-from schema.database.user import UserCreate, UserUpdate, User
+from schema.database.user import UserCreate, UserUpdate, User, RegisterUserRequest
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
-from service.user import login_for_access_token, get_current_user
+from service.user import login_for_access_token, get_current_user, register_user
 
 router = APIRouter(
     tags=["user"],
@@ -56,6 +56,5 @@ async def log_in_with_token(
 
 
 @router.post("/register")
-async def register_user(user: UserCreate, db: Session = Depends(get_db)):
-    print("user is here:",user)
-    return repository.user.create(db, user)
+async def register(request: RegisterUserRequest, db: Session = Depends(get_db)):
+    return register_user(request, db)

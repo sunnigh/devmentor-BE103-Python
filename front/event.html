@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event List</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .clickable-row {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="mb-4">Event List</h2>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th scope="col">Event ID</th>
+            <th scope="col">Event Date</th>
+            <th scope="col">Content Language</th>
+            <th scope="col">Content Data</th>
+            <th scope="col">Actions</th>
+        </tr>
+        </thead>
+        <tbody id="eventTable">
+        <!-- Dynamic rows will be added here -->
+        </tbody>
+    </table>
+    <button id="addEventButton" class="btn btn-success">新增</button>
+</div>
+
+<!-- Edit Content Modal -->
+<div class="modal fade" id="editContentModal" tabindex="-1" role="dialog" aria-labelledby="editContentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editContentModalLabel">Edit Content</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editContentForm">
+                    <div class="form-group">
+                        <label for="editContentData">Content Data</label>
+                        <input type="text" class="form-control" id="editContentData">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveEditButton">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    const baseUrl = 'http://127.0.0.1:8021/v1';  // 替換成你的API基礎URL
+
+    let currentEditEventId = null;
+    let currentEditLanguage = null;
+
+    // Function to fetch and render the event table
+    async function fetchAndRenderEvents() {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            alert('未授權，請先登入');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        try {
+            const response = await fetch(`${baseUrl}/events`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const events = await response.json();
+            renderTable(events);
+        } catch (error) {
+            console.error('Error fetching events:', error);
+        }
+    }
+
+    // Function to render the event table
+    function renderTable(events) {
+        const eventTable = $('#eventTable');
+        eventTable.empty();
+        const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '{}');
+
+        events.forEach(eventData => {
+            const event = eventData.event;
+            const contents = eventData.contents;
+
+            contents.forEach(content => {
+                const subscribed = subscriptions[event.id] || event.subscribed;
+                const row = `<tr class="clickable-row" data-href="event_detail.html?id=${event.id}">
+                    <td>${event.id}</td>
+                    <td>${event.event_date}</td>
+                    <td>${content.language}</td>
+                    <td>${content.contents_data}</td>
+                    <td>
+                        <button class="btn btn-${subscribed ? 'danger' : 'primary'} btn-sm subscribe-btn" data-id="${event.id}">
+                            ${subscribed ? 'Unsubscribe' : 'Subscribe'}
+                        </button>
+                        <button class="btn btn-secondary btn-sm edit-btn" data-id="${event.id}" data-language="${content.language}" data-content="${content.contents_data}">Edit</button>
+                    </td>
+                </tr>`;
+                eventTable.append(row);
+            });
+        });
+
+        // Add click event to rows
+        $('.clickable-row').click(function() {
+            window.location.href = $(this).data('href');
+        });
+
+        // Prevent click event on buttons inside the row
+        $('.subscribe-btn, .edit-btn').click(function(event) {
+            event.stopPropagation();
+        });
+
+        // Subscribe/Unsubscribe button event
+        $('.subscribe-btn').click(async function() {
+            const button = $(this);
+            const eventId = button.data('id');
+            const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '{}');
+
+            if (subscriptions[eventId]) {
+                // Unsubscribe
+                const success = await cancelSubscribe(eventId);
+                if (success) {
+                    delete subscriptions[eventId];
+                    localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
+                    button.text('Subscribe').removeClass('btn-danger').addClass('btn-primary');
+                }
+            } else {
+                // Subscribe
+                const success = await subscribe(eventId);
+                if (success) {
+                    subscriptions[eventId] = true;
+                    localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
+                    button.text('Unsubscribe').removeClass('btn-primary').addClass('btn-danger');
+                }
+            }
+        });
+
+        // Edit button event
+        $('.edit-btn').click(function() {
+            currentEditEventId = $(this).data('id');
+            currentEditLanguage = $(this).data('language');
+            const currentContent = $(this).data('content');
+            $('#editContentData').val(currentContent);
+            $('#editContentModal').modal('show');
+        });
+    }
+
+    async function subscribe(eventId) {
+        const token = localStorage.getItem('accessToken');
+        try {
+            const response = await fetch(`${baseUrl}/events/${eventId}/subscribe`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ subscribe: true })
+            });
+            if (response.ok) {
+                return true;
+            } else {
+                const error = await response.json();
+                alert(`Error subscribing: ${error.detail}`);
+                return false;
+            }
+        } catch (error) {
+            console.error('Error subscribing:', error);
+            return false;
+        }
+    }
+
+    async function cancelSubscribe(eventId) {
+        const token = localStorage.getItem('accessToken');
+        try {
+            const response = await fetch(`${baseUrl}/events/${eventId}/subscribe`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                return true;
+            } else {
+                const error = await response.json();
+                alert(`Error unsubscribing: ${error.detail}`);
+                return false;
+            }
+        } catch (error) {
+            console.error('Error unsubscribing:', error);
+            return false;
+        }
+    }
+
+    async function saveEvent(eventDate, language, contentData) {
+        const token = localStorage.getItem('accessToken');
+        try {
+            // 創建事件
+            const eventResponse = await fetch(`${baseUrl}/events`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ date: eventDate })
+            });
+
+            if (!eventResponse.ok) {
+                const error = await eventResponse.json();
+                console.error('Error creating event:', error);
+                alert(`Error creating event: ${error.detail}`);
+                return;
+            }
+
+            const event = await eventResponse.json();
+
+            // 創建內容
+            const formData = new FormData();
+            formData.append('contents_data', contentData);
+
+            const contentResponse = await fetch(`${baseUrl}/events/${event.id}/lang/${language}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (contentResponse.ok) {
+                alert('Event and content saved successfully');
+                fetchAndRenderEvents();
+            } else {
+                const error = await contentResponse.json();
+                console.error('Error creating content:', error);
+                alert(`Error creating content: ${JSON.stringify(error)}`);
+            }
+        } catch (error) {
+            console.error('Error saving event:', error);
+        }
+    }
+
+    // 新增按鈕的事件監聽
+    $('#addEventButton').click(function() {
+        const newRow = `<tr>
+            <td></td>
+            <td><input type="date" class="form-control" id="newEventDate"></td>
+            <td><input type="text" class="form-control" id="newEventLanguage"></td>
+            <td><input type="text" class="form-control" id="newEventContent"></td>
+            <td><button class="btn btn-success btn-sm save-btn">儲存</button></td>
+        </tr>`;
+        $('#eventTable').append(newRow);
+
+        // Save button event
+        $('.save-btn').click(async function() {
+            const eventDate = $('#newEventDate').val();
+            const language = $('#newEventLanguage').val();
+            const contentData = $('#newEventContent').val();
+
+            await saveEvent(eventDate, language, contentData);
+        });
+    });
+
+    // 保存編輯內容
+    $('#saveEditButton').click(async function() {
+        const newContentData = $('#editContentData').val();
+        const token = localStorage.getItem('accessToken');
+
+        try {
+            const formData = new FormData();
+            formData.append('contents_data', newContentData);
+
+            const response = await fetch(`${baseUrl}/events/${currentEditEventId}/lang/${currentEditLanguage}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                $('#editContentModal').modal('hide');
+                alert('Content updated successfully');
+                fetchAndRenderEvents();
+            } else {
+                const error = await response.json();
+                alert(`Error updating content: ${error.detail}`);
+            }
+        } catch (error) {
+            console.error('Error updating content:', error);
+        }
+    });
+
+    // Initial fetch and render
+    fetchAndRenderEvents();
+</script>
+</body>
+</html>

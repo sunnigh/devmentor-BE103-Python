@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center align-items-center vh-100">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">註冊</h2>
+                        <form id="register-form">
+                            <div class="form-group">
+                                <label for="name">用戶名</label>
+                                <input type="text" class="form-control" id="name" name="name" placeholder="請輸入用戶名" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="username">用戶帳號</label>
+                                <input type="text" class="form-control" id="username" name="username" placeholder="請輸入用戶帳號" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">用戶密碼</label>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="請輸入用戶密碼" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="preferred_language">偏好語言</label>
+                                <input type="text" class="form-control" id="preferred_language" name="preferred_language" placeholder="請輸入偏好語言" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">用戶email</label>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="請輸入用戶email" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">註冊</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Axios for making HTTP requests -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('register-form').addEventListener('submit', async function(event) {
+                event.preventDefault();
+
+                const name = document.getElementById('name').value;
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const preferred_language = document.getElementById('preferred_language').value;
+                const email = document.getElementById('email').value;
+
+                try {
+                    const response = await axios.post('http://127.0.0.1:8021/v1/users/register', {
+                        user: {
+                            user_name: name,
+                            account: username,
+                            password: password,
+                            language: preferred_language,
+                            is_login: false
+                        },
+                        email: email
+                    });
+
+                    // Handle successful registration (e.g., redirect to login page)
+                    console.log('Registration successful:', response.data);
+                    alert('Registration successful!');
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    // Handle registration error
+                    console.error('Error registering:', error);
+                    alert('Registration failed. Please check your inputs.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
