@@ -53,3 +53,17 @@ def delete(db: Session, user_id: int):
 
 def get_user(db: Session, username: str):
     return db.query(User).filter(User.user_name == username).first()
+
+
+def get_by_account(db: Session, account: str):
+    user = db.query(User).filter(User.account == account).first()
+    if user:
+        raise HTTPException(status_code=400, detail="Account already exists")
+    return user
+
+
+def get_by_password(db: Session, password: str):
+    user_with_same_password = db.query(User).filter(User.password == password).first()
+    if user_with_same_password:
+        raise HTTPException(status_code=400, detail="Password is already in use")
+    return user_with_same_password

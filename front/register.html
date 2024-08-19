@@ -28,8 +28,11 @@
                                 <input type="password" class="form-control" id="password" name="password" placeholder="請輸入用戶密碼" required>
                             </div>
                             <div class="form-group">
-                                <label for="preferred_language">偏好語言</label>
-                                <input type="text" class="form-control" id="preferred_language" name="preferred_language" placeholder="請輸入偏好語言" required>
+                            <label for="preferred_language">偏好語言</label>
+                            <select class="form-control" id="preferred_language" name="preferred_language" required>
+                            <option value="en">English</option>
+                            <option value="zhtw">繁體中文</option>
+                            </select>
                             </div>
                             <div class="form-group">
                                 <label for="email">用戶email</label>
@@ -50,38 +53,48 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('register-form').addEventListener('submit', async function(event) {
-                event.preventDefault();
+    document.getElementById('register-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
 
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            // 檢查帳號與密碼是否重複
+            const checkResponse = await axios.post('http://127.0.0.1:8021/v1/users/check-duplicate', {
+                account: username,
+                password: password
+            });
+
+            // 如果沒有重複，進行註冊
+            if (checkResponse.data.message === "No duplicates found") {
                 const name = document.getElementById('name').value;
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
                 const preferred_language = document.getElementById('preferred_language').value;
                 const email = document.getElementById('email').value;
 
-                try {
-                    const response = await axios.post('http://127.0.0.1:8021/v1/users/register', {
-                        user: {
-                            user_name: name,
-                            account: username,
-                            password: password,
-                            language: preferred_language,
-                            is_login: false
-                        },
-                        email: email
-                    });
+                const registerResponse = await axios.post('http://127.0.0.1:8021/v1/users/register', {
+                    user: {
+                        user_name: name,
+                        account: username,
+                        password: password,
+                        language: preferred_language,
+                        is_login: false
+                    },
+                    email: email
+                });
 
-                    // Handle successful registration (e.g., redirect to login page)
-                    console.log('Registration successful:', response.data);
-                    alert('Registration successful!');
-                    window.location.href = 'login.html';
-                } catch (error) {
-                    // Handle registration error
-                    console.error('Error registering:', error);
-                    alert('Registration failed. Please check your inputs.');
-                }
-            });
-        });
+                console.log('Registration successful:', registerResponse.data);
+                alert('Registration successful!');
+                window.location.href = 'login.html';
+            }
+        } catch (error) {
+            // 如果有錯誤（例如重複帳號或密碼），顯示錯誤訊息
+            console.error('Error:', error.response.data);
+            alert(error.response.data.detail);
+        }
+    });
+});
+
     </script>
 </body>
 </html>

@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends,HTTPException
 from sqlalchemy.orm import Session
 import repository.user
 from infrastructure.mysql import get_db
-from schema.database.user import UserCreate, UserUpdate, User, RegisterUserRequest
+from schema.database.user import UserCreate, UserUpdate, User, RegisterUserRequest, DuplicateCheckRequest
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
 from service.user import login_for_access_token, get_current_user, register_user
@@ -58,3 +58,10 @@ async def log_in_with_token(
 @router.post("/register")
 async def register(request: RegisterUserRequest, db: Session = Depends(get_db)):
     return register_user(request, db)
+
+
+@router.post("/check-duplicate")
+async def check_duplicate(request: DuplicateCheckRequest, db: Session = Depends(get_db)):
+    repository.user.get_by_account(db, request.account)
+    repository.user.get_by_password(db, request.password)
+    return {"message": "No duplicates found"}
