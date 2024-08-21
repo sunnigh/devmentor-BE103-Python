@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends,HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import repository.user
 from infrastructure.mysql import get_db
 from schema.database.user import UserCreate, UserUpdate, User, RegisterUserRequest, DuplicateCheckRequest
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
-from service.user import login_for_access_token, get_current_user, register_user
+from service.user import login_for_access_token, get_current_user, register_user, validate_token, oauth2_scheme
 
 router = APIRouter(
     tags=["user"],
@@ -65,3 +65,9 @@ async def check_duplicate(request: DuplicateCheckRequest, db: Session = Depends(
     repository.user.get_by_account(db, request.account)
     repository.user.get_by_password(db, request.password)
     return {"message": "No duplicates found"}
+
+
+@router.get("/validate-token")
+async def validate_token_route(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
+    validate_token(token, db)
+    return {"message": "Token is valid"}

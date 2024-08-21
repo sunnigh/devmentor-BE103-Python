@@ -28,8 +28,8 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-def login_for_access_token(db: Session, username: str, password: str) -> Token:
-    user = authenticate_user(db, username, password)
+def login_for_access_token(db: Session, account: str, password: str) -> Token:
+    user = authenticate_user(db, account, password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -43,16 +43,16 @@ def login_for_access_token(db: Session, username: str, password: str) -> Token:
     return Token(access_token=access_token, token_type="bearer", is_login=True)
 
 
-def authenticate_user(db: Session, username: str, password: str):
-    user = get_user(db, username)
-    if not user:
+def authenticate_user(db: Session, account: str, password: str):
+    user_account = get_account(db, account)
+    if not user_account:
         return False
-    if not verify_password(password, user.password):
+    if not verify_password(password, user_account.password):
         return False
-    user.is_login = True
+    user_account.is_login = True
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(user_account)
+    return user_account
 
 
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)) -> User:
@@ -69,7 +69,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session 
         token_data = (TokenData(username=username))
     except InvalidTokenError:
         raise credentials_exception
-    user = get_user(db, token_data.username)
+    user = get_account(db, token_data.account)
     if user is None:
         raise credentials_exception
     return user
@@ -86,8 +86,8 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session 
 #     return db_user
 
 
-def get_user(db: Session, username: str):
-    return db.query(User).filter(User.user_name == username).first()
+def get_account(db: Session, account: str):
+    return db.query(User).filter(User.account == account).first()
 
 
 # def register_user(user: UserCreate, email: str, db: Session = Depends(get_db)):
@@ -111,3 +111,24 @@ def register_user(request: RegisterUserRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Notification method creation failed")
 
     return {"user": db_user, "notify": db_notify}
+
+
+def validate_token(token: str, db: Session) -> bool:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except InvalidTokenError:
+        raise credentials_exception
+
+    user = get_account(db, username)
+    if user is None:
+        raise credentials_exception
+
+    return True

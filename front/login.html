@@ -16,8 +16,8 @@
                         <h2 class="card-title text-center mb-4">登入</h2>
                         <form id="login-form">
                             <div class="form-group">
-                                <label for="username">使用者名稱</label>
-                                <input type="text" class="form-control" id="username" name="username" placeholder="請輸入使用者名稱" required>
+                                <label for="username">使用者帳號</label>
+                                <input type="text" class="form-control" id="username" name="username" placeholder="請輸入使用者帳號" required>
                             </div>
                             <div class="form-group">
                                 <label for="password">密碼</label>
@@ -40,6 +40,28 @@
     <!-- Axios for making HTTP requests -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('accessToken');
+            const tokenExpiry = localStorage.getItem('tokenExpiry');
+
+            if (token && tokenExpiry && new Date().getTime() < tokenExpiry) {
+                // 檢查 Token 是否有效
+                axios.get('http://127.0.0.1:8001/v1/users/validate-token', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }).then(response => {
+                    // Token 有效，跳轉到 event.html
+                    window.location.href = 'event.html';
+                }).catch(error => {
+                    console.error('Token 驗證失敗:', error);
+                    // Token 無效，保留在登入頁面
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('tokenExpiry');
+                });
+            }
+        });
+
         document.getElementById('login-form').addEventListener('submit', async function(event) {
             event.preventDefault();
 
@@ -47,16 +69,19 @@
             const password = document.getElementById('password').value;
 
             try {
-                const response = await axios.post('http://127.0.0.1:8021/v1/users/token', new URLSearchParams({
+                const response = await axios.post('http://127.0.0.1:8001/v1/users/token', new URLSearchParams({
                     username: username,
                     password: password
                 }));
 
                 const data = response.data;
+                const expiryTime = new Date().getTime() + (30 * 60 * 1000); // 30分鐘有效期
+
                 localStorage.setItem('accessToken', data.access_token);
+                localStorage.setItem('tokenExpiry', expiryTime);
 
                 alert('登入成功!');
-                // Redirect to event.html after successful login
+                // 登入成功後跳轉至 event.html
                 window.location.href = 'event.html';
             } catch (error) {
                 console.error('Error:', error);
