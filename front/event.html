@@ -60,7 +60,7 @@
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-    const baseUrl = 'http://127.0.0.1:8001/v1';  // 替換成你的API基礎URL
+    const baseUrl = 'http://127.0.0.1:8004/v1';  // 替換成你的API基礎URL
 
     let currentEditEventId = null;
     let currentEditLanguage = null;
@@ -93,31 +93,64 @@
         eventTable.empty();
         const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '{}');
 
+        const eventMap = {};
+
         events.forEach(eventData => {
             const event = eventData.event;
             const contents = eventData.contents;
 
-            contents.forEach(content => {
-                const subscribed = subscriptions[event.id] || event.subscribed;
-                const row = `<tr class="clickable-row" data-href="event_detail.html?id=${event.id}">
-                    <td>${event.id}</td>
-                    <td>${event.event_date}</td>
-                    <td>${content.language}</td>
-                    <td>${content.contents_data}</td>
-                    <td>
-                        <button class="btn btn-${subscribed ? 'danger' : 'primary'} btn-sm subscribe-btn" data-id="${event.id}">
-                            ${subscribed ? 'Unsubscribe' : 'Subscribe'}
-                        </button>
-                        <button class="btn btn-secondary btn-sm edit-btn" data-id="${event.id}" data-language="${content.language}" data-content="${content.contents_data}">Edit</button>
-                    </td>
-                </tr>`;
+            // 如果 event_id 已經存在於 eventMap 中，則更新對應行的內容
+            if (eventMap[event.id]) {
+                const row = eventMap[event.id];
+                const languageSelect = row.find('.languageSelect');
+                const contentDataCell = row.find('.contentData');
+
+                contents.forEach(content => {
+                    // 添加語言選項到下拉列表
+                    languageSelect.append(`<option value="${content.language}">${content.language}</option>`);
+                });
+
+                // 默認顯示第一個語言對應的內容
+                if (contents.length > 0) {
+                    contentDataCell.text(contents[0].contents_data);
+                }
+            } else {
+                // 創建新行
+                const row = $(`
+                    <tr class="clickable-row" data-href="event_detail.html?id=${event.id}">
+                        <td>${event.id}</td>
+                        <td>${event.event_date}</td>
+                        <td class="non-clickable">
+                            <select class="form-select languageSelect" data-event-id="${event.id}">
+                                ${contents.map(content => `
+                                    <option value="${content.language}">${content.language}</option>
+                                `).join('')}
+                            </select>
+                        </td>
+                        <td class="contentData">${contents[0]?.contents_data || 'No Content'}</td>
+                        <td>
+                            <button class="btn btn-${subscriptions[event.id] ? 'danger' : 'primary'} btn-sm subscribe-btn" data-id="${event.id}">
+                                ${subscriptions[event.id] ? 'Unsubscribe' : 'Subscribe'}
+                            </button>
+                            <button class="btn btn-secondary btn-sm edit-btn" data-id="${event.id}" data-language="${contents[0]?.language}" data-content="${contents[0]?.contents_data}">Edit</button>
+                        </td>
+                    </tr>
+                `);
+
+                // 將新行添加到表格
                 eventTable.append(row);
-            });
+
+                // 將該行保存到 eventMap 中
+                eventMap[event.id] = row;
+            }
         });
 
         // Add click event to rows
-        $('.clickable-row').click(function() {
-            window.location.href = $(this).data('href');
+        $('.clickable-row').click(function(event) {
+            // 檢查是否點擊的是非可點擊區域或下拉選單
+            if (!$(event.target).hasClass('non-clickable') && !$(event.target).hasClass('languageSelect')) {
+                window.location.href = $(this).data('href');
+            }
         });
 
         // Prevent click event on buttons inside the row
@@ -157,6 +190,19 @@
             const currentContent = $(this).data('content');
             $('#editContentData').val(currentContent);
             $('#editContentModal').modal('show');
+        });
+
+        // Change content data when language selection changes
+        $('.languageSelect').change(function() {
+            const selectedLanguage = $(this).val();
+            const eventId = $(this).data('event-id');
+            const row = eventMap[eventId];
+            const contentDataCell = row.find('.contentData');
+
+            // 更新對應語言的內容數據
+            const eventData = events.find(e => e.event.id === eventId);
+            const content = eventData.contents.find(c => c.language === selectedLanguage);
+            contentDataCell.text(content ? content.contents_data : 'No Content');
         });
     }
 
@@ -216,85 +262,61 @@
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ date: eventDate })
+                body: JSON.stringify({ event_date: eventDate })
             });
 
             if (!eventResponse.ok) {
                 const error = await eventResponse.json();
-                console.error('Error creating event:', error);
                 alert(`Error creating event: ${error.detail}`);
-                return;
+                return false;
             }
 
             const event = await eventResponse.json();
 
             // 創建內容
-            const formData = new FormData();
-            formData.append('contents_data', contentData);
-
-            const contentResponse = await fetch(`${baseUrl}/events/${event.id}/lang/${language}`, {
+            const contentResponse = await fetch(`${baseUrl}/events/${event.id}/contents`, {
                 method: 'POST',
                 headers: {
+                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: formData
+                body: JSON.stringify({ language, contents_data: contentData })
             });
 
             if (contentResponse.ok) {
-                alert('Event and content saved successfully');
-                fetchAndRenderEvents();
+                return true;
             } else {
                 const error = await contentResponse.json();
-                console.error('Error creating content:', error);
-                alert(`Error creating content: ${JSON.stringify(error)}`);
+                alert(`Error creating content: ${error.detail}`);
+                return false;
             }
         } catch (error) {
-            console.error('Error saving event:', error);
+            console.error('Error creating event or content:', error);
+            return false;
         }
     }
 
-    // 新增按鈕的事件監聽
-    $('#addEventButton').click(function() {
-        const newRow = `<tr>
-            <td></td>
-            <td><input type="date" class="form-control" id="newEventDate"></td>
-            <td><input type="text" class="form-control" id="newEventLanguage"></td>
-            <td><input type="text" class="form-control" id="newEventContent"></td>
-            <td><button class="btn btn-success btn-sm save-btn">儲存</button></td>
-        </tr>`;
-        $('#eventTable').append(newRow);
-
-        // Save button event
-        $('.save-btn').click(async function() {
-            const eventDate = $('#newEventDate').val();
-            const language = $('#newEventLanguage').val();
-            const contentData = $('#newEventContent').val();
-
-            await saveEvent(eventDate, language, contentData);
-        });
-    });
-
-    // 保存編輯內容
+    // Edit content save button event
     $('#saveEditButton').click(async function() {
-        const newContentData = $('#editContentData').val();
         const token = localStorage.getItem('accessToken');
+        const newContentData = $('#editContentData').val();
 
         try {
-            const formData = new FormData();
-            formData.append('contents_data', newContentData);
-
-            const response = await fetch(`${baseUrl}/events/${currentEditEventId}/lang/${currentEditLanguage}`, {
-                method: 'PUT',
+            const response = await fetch(`${baseUrl}/events/${currentEditEventId}/contents`, {
+                method: 'PATCH',
                 headers: {
+                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: formData
+                body: JSON.stringify({
+                    language: currentEditLanguage,
+                    contents_data: newContentData
+                })
             });
 
             if (response.ok) {
                 $('#editContentModal').modal('hide');
-                alert('Content updated successfully');
-                fetchAndRenderEvents();
+                fetchAndRenderEvents();  // 重新加載事件列表
             } else {
                 const error = await response.json();
                 alert(`Error updating content: ${error.detail}`);
@@ -304,8 +326,27 @@
         }
     });
 
+    // Add event button click event
+    $('#addEventButton').click(function() {
+        const eventDate = prompt('請輸入事件日期 (YYYY-MM-DD):');
+        const language = prompt('請輸入語言代碼 (如: en, zhtw):');
+        const contentData = prompt('請輸入內容資料:');
+
+        if (eventDate && language && contentData) {
+            saveEvent(eventDate, language, contentData).then(success => {
+                if (success) {
+                    fetchAndRenderEvents();  // 重新加載事件列表
+                }
+            });
+        } else {
+            alert('所有欄位皆為必填！');
+        }
+    });
+
     // Initial fetch and render
-    fetchAndRenderEvents();
+    $(document).ready(function() {
+        fetchAndRenderEvents();
+    });
 </script>
 </body>
 </html>

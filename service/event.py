@@ -38,11 +38,12 @@ def trigger_event(db: Session, event_id: int, notification_type: str):
         db.commit()
         db.refresh(db_notify_service)
 
-        # 填入send_log table
-
+        # 優先嘗試找到匹配語言的內容，否則使用任何語言的內容
         content = db.query(Content).filter(Content.event_id == event_id, Content.language == language).first()
         if not content:
-            continue
+            content = db.query(Content).filter(Content.event_id == event_id).first()  # 使用任意語言的內容
+            if not content:
+                continue
         content_data = content.contents_data
 
         make_send_log(db, event_id, user_id, notification_type, datetime.now().date(), content_data)
@@ -100,6 +101,3 @@ def get_send_log(event_id: int, db: Session):
         "total send times": send_times,
         "sendlog_list": sendlog_list
     }
-
-
-

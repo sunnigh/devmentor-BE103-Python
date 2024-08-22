@@ -50,26 +50,30 @@ def subscribe(db: Session, event_id: int, current_user: User):
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
 
-    existing_subscription = (db.query(Subscribe).
-                             filter_by(event_id=event_id, user_id=current_user.id).first())
-    if existing_subscription:
-        raise HTTPException(status_code=400, detail="Already subscribed to this event")
+    # 订阅所有语言版本的内容
+    contents = db.query(Content).filter(Content.event_id == event_id).all()
+    for content in contents:
+        existing_subscription = (db.query(Subscribe).
+                                 filter_by(event_id=event_id,
+                                           user_id=current_user.id).first())
+        if not existing_subscription:
+            db_subscription = Subscribe(event_id=event_id, user_id=current_user.id)
+            db.add(db_subscription)
 
-    db_subscription = Subscribe(event_id=event_id, user_id=current_user.id)
-    db.add(db_subscription)
     db.commit()
-    db.refresh(db_subscription)
-    return db_subscription
+    return {"message": "Subscribed to event and all associated languages successfully."}
 
 
 def cancel_subscribe(db: Session, event_id: int, current_user: User):
-    subscription = db.query(Subscribe).filter_by(event_id=event_id, user_id=current_user.id).first()
-    if not subscription:
-        raise HTTPException(status_code=404, detail="Subscription not found")
+    subscriptions = db.query(Subscribe).filter_by(event_id=event_id, user_id=current_user.id).all()
+    if not subscriptions:
+        raise HTTPException(status_code=404, detail="No subscriptions found for this event and user")
 
-    db.delete(subscription)
+    for subscription in subscriptions:
+        db.delete(subscription)
+
     db.commit()
-    return subscription
+    return {"message": "Unsubscribed from event and all associated languages successfully."}
 
 
 def get_content_by_event_and_language(db: Session, event_id: int, language: str, current_user: User):

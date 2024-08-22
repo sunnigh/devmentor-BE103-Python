@@ -67,3 +67,9 @@ def get_by_password(db: Session, password: str):
     if user_with_same_password:
         raise HTTPException(status_code=400, detail="Password is already in use")
     return user_with_same_password
+
+
+def get_username(db: Session, user_id: int) -> str:
+    user = get(db, user_id)  # 直接利用已有的 `get` 方法
+    return user.user_name
+
