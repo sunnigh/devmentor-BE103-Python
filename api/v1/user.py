@@ -71,3 +71,9 @@ async def check_duplicate(request: DuplicateCheckRequest, db: Session = Depends(
 async def validate_token_route(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
     validate_token(token, db)
     return {"message": "Token is valid"}
+
+
+@router.get("/{user_id}/username")
+def get_username(user_id: int, db: Session = Depends(get_db)):
+    user = repository.user.get(db, user_id)
+    return {"username": user.user_name}

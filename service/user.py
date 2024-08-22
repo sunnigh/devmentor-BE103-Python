@@ -63,10 +63,10 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session 
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        account: str = payload.get("sub")
+        if account is None:
             raise credentials_exception
-        token_data = (TokenData(username=username))
+        token_data = (TokenData(account=account))
     except InvalidTokenError:
         raise credentials_exception
     user = get_account(db, token_data.account)
