@@ -3,9 +3,11 @@ from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
 import repository.event
 from infrastructure.mysql import get_db
-from schema.database.event import EventCreate, EventUpdate, EventSubscribe, EventTriggerRequest
+from schema.database.event import EventCreate, EventUpdate, EventTriggerRequest, SendVerificationCodeRequest, \
+    VerifyCodeRequest
 from service.user import get_current_user
 from schema.database.user import User
+from utility.notify import VerificationService, EmailService
 
 router = APIRouter(
     tags=["event"],
@@ -124,3 +126,18 @@ def update_content(event_id: int,
                    db: Session = Depends(get_db),
                    current_user: User = Depends(get_current_user)):
     return repository.event.update_content(db, event_id, language, contents_data, current_user)
+
+
+@router.post("/send-verification-code")
+def send_verification_code(request: SendVerificationCodeRequest, db: Session = Depends(get_db)):
+    email_service = EmailService(from_address="my_email", password="jdvxjaokltuhoshx")
+    verification_service = VerificationService(db, email_service)
+    verification_service.send_verification_code(request.email)
+    return {"message": "Verification code sent"}
+
+
+@router.post("/verify-code")
+def verify_code(request: VerifyCodeRequest, db: Session = Depends(get_db)):
+    email_service = EmailService(from_address="my_email", password="jdvxjaokltuhoshx")
+    verification_service = VerificationService(db, email_service)
+    return verification_service.verify_code(request.email, request.code)

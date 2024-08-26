@@ -40,3 +40,12 @@ class ContentResponse(BaseModel):
 
 class EventTriggerRequest(BaseModel):
     type: str
+
+
+class SendVerificationCodeRequest(BaseModel):
+    email: str
+
+
+class VerifyCodeRequest(BaseModel):
+    email: str
+    code: str
