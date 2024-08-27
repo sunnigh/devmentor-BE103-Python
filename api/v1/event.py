@@ -130,7 +130,7 @@ def update_content(event_id: int,
 
 @router.post("/send-verification-code")
 def send_verification_code(request: SendVerificationCodeRequest, db: Session = Depends(get_db)):
-    email_service = EmailService(from_address="my_email", password="jdvxjaokltuhoshx")
+    email_service = EmailService(from_address="d7031887@gmail.com", password="jdvxjaokltuhoshx")
     verification_service = VerificationService(db, email_service)
     verification_service.send_verification_code(request.email)
     return {"message": "Verification code sent"}
@@ -138,6 +138,6 @@ def send_verification_code(request: SendVerificationCodeRequest, db: Session = D
 
 @router.post("/verify-code")
 def verify_code(request: VerifyCodeRequest, db: Session = Depends(get_db)):
-    email_service = EmailService(from_address="my_email", password="jdvxjaokltuhoshx")
+    email_service = EmailService(from_address="d7031887@gmail.com", password="jdvxjaokltuhoshx")
     verification_service = VerificationService(db, email_service)
     return verification_service.verify_code(request.email, request.code)

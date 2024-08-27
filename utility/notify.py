@@ -3,8 +3,9 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from database.verification import EmailVerification
+from database.emailverification import EmailVerification
 
 
 class EmailService:

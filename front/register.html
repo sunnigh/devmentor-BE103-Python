@@ -69,7 +69,7 @@
                 }
 
                 try {
-                    const response = await axios.post('http://127.0.0.1:8021/send-verification-code', {
+                    const response = await axios.post('http://127.0.0.1:8008/v1/events/send-verification-code', {
                         email: email
                     });
 
@@ -92,7 +92,7 @@
                 }
 
                 try {
-                    const response = await axios.post('http://127.0.0.1:8021/verify-code', {
+                    const response = await axios.post('http://127.0.0.1:8008/v1/events/verify-code', {
                         email: email,
                         code: code
                     });
@@ -114,7 +114,7 @@
 
                 try {
                     // 檢查帳號與密碼是否重複
-                    const checkResponse = await axios.post('http://127.0.0.1:8021/v1/users/check-duplicate', {
+                    const checkResponse = await axios.post('http://127.0.0.1:8007/v1/users/check-duplicate', {
                         account: username,
                         password: password
                     });
@@ -125,7 +125,7 @@
                         const preferred_language = document.getElementById('preferred_language').value;
                         const email = document.getElementById('email').value;
 
-                        const registerResponse = await axios.post('http://127.0.0.1:8021/v1/users/register', {
+                        const registerResponse = await axios.post('http://127.0.0.1:8008/v1/users/register', {
                             user: {
                                 user_name: name,
                                 account: username,
