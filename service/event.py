@@ -8,7 +8,7 @@ from database.notify import Notify
 from fastapi import HTTPException
 from database.user import User
 from repository.user import get as get_user_id
-from utility.notify import send_email
+from utility.notify import EmailService
 
 
 def trigger_event(db: Session, event_id: int, notification_type: str):
@@ -17,6 +17,8 @@ def trigger_event(db: Session, event_id: int, notification_type: str):
         raise HTTPException(status_code=404, detail="No subscriptions found for this event")
 
     info_list = []
+
+    email_service = EmailService(from_address="your_email@example.com", password="your_email_password")
 
     for subscription in subscriptions:
         user_id = subscription.user_id
@@ -47,11 +49,18 @@ def trigger_event(db: Session, event_id: int, notification_type: str):
         content_data = content.contents_data
 
         make_send_log(db, event_id, user_id, notification_type, datetime.now().date(), content_data)
-        send_email(notification_data, username, content_data)
+
+        # 設置自訂的主題和正文內容
+        subject = "event_trigger"
+        body = f"Dear {username},\n\ninfo you  {content_data}\n\nBest regards,"
+
+        # 發送郵件
+        email_service.send_email(notification_data, subject, body)
 
         info_list.append({"username": username, "content_data": content_data, "notification_data": notification_data})
 
     return {"info": info_list}
+
 
 
 def trigger_log(event_id: int, db: Session):
