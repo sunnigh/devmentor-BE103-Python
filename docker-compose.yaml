@@ -9,6 +9,7 @@ services:
       - "8000:80"
     depends_on:
       - mysql
+
   mysql:
     image: library/mysql:8.0
     container_name: mysql80
@@ -20,3 +21,13 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=root
     command: [ "--bind-address=0.0.0.0", "--init-file=/docker-entrypoint-initdb.d/init.sql" ]
+
+  ngrok:
+    image: wernight/ngrok:latest
+    command: ["ngrok", "http", "80"]  # 使用 http://web:80 来更明确
+    ports:
+      - 4040:4040  # ngrok web interface
+    environment:
+      - NGROK_AUTHTOKEN=2lHjvpGeVQLWRUZ4pl0GVeakdKm_5FZaMJfs3JKwCQP4H5BtG
+
+
